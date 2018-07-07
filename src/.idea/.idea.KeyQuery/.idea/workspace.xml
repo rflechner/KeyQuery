@@ -14,56 +14,54 @@
       <file leaf-file-name="Library.fs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/Library.fs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="22" column="15" selection-start-line="22" selection-start-column="15" selection-end-line="22" selection-end-column="15" />
+            <state>
+              <caret column="18" selection-start-column="10" selection-end-column="18" />
               <folding>
-                <marker date="1530959730134" expanded="true" signature="25:150" ph="..." />
-                <marker date="1530959730134" expanded="true" signature="217:845" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="244:672" ph=") =  ..." />
-                <marker date="1530959730134" expanded="true" signature="382:545" ph=" : Expression = ..." />
-                <marker date="1530959730134" expanded="true" signature="426:516" ph=" ..." />
-                <marker date="1530959730134" expanded="true" signature="571:672" ph=" ..." />
-                <marker date="1530959730134" expanded="true" signature="589:672" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="741:845" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="998:2686" ph="when 'tid : comparison&gt; = ..." />
-                <marker date="1530959730134" expanded="true" signature="1026:1100" ph="{ Records : ConcurrentDictionary&lt;'tid,'t&gt; ..." />
-                <marker date="1530959730134" expanded="true" signature="1155:1478" ph=" =  ..." />
-                <marker date="1530959730134" expanded="true" signature="1266:1400" ph="for name in indexedFields do ..." />
-                <marker date="1530959730134" expanded="true" signature="1408:1477" ph=" Records = ConcurrentDictionary&lt;'tid,'t&gt;() ..." />
-                <marker date="1530959730134" expanded="true" signature="1508:1556" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="1615:1877" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="1721:1808" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="1941:2157" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="2235:2482" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="2508:2686" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="2553:2686" ph=" ..." />
-                <marker date="1530959730134" expanded="true" signature="2620:2669" ph="// todo: ..." />
-                <marker date="1530959730134" expanded="true" signature="2704:2771" ph="= ..." />
-                <marker date="1530959730134" expanded="true" signature="2708:2771" ph="| QueryById    of obj ..." />
-                <marker date="1530959730134" expanded="true" signature="2796:2866" ph="=     ..." />
-                <marker date="1530959730134" expanded="true" signature="2804:2866" ph="| And of Operation * Operation ..." />
-                <marker date="1530959730134" expanded="true" signature="2883:2929" ph="when 'tid : comparison&gt; = ..." />
-                <marker date="1530959730134" expanded="true" signature="2978:4218" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="3146:3260" ph=" =  ..." />
-                <marker date="1530959730134" expanded="true" signature="3169:3260" ph=" ..." />
-                <marker date="1530959730134" expanded="true" signature="3369:3534" ph=" =  ..." />
-                <marker date="1530959730134" expanded="true" signature="3393:3534" ph=" ..." />
-                <marker date="1530959730134" expanded="true" signature="3412:3519" ph=" -&gt;  ..." />
-                <marker date="1530959730134" expanded="true" signature="3485:3519" ph=" then head::rest ..." />
-                <marker date="1530959730134" expanded="true" signature="3610:3828" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="3625:3828" ph=" ..." />
-                <marker date="1530959730134" expanded="true" signature="3649:3721" ph=" -&gt; ..." />
-                <marker date="1530959730134" expanded="true" signature="3959:4218" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="4015:4218" ph=" ..." />
-                <marker date="1530959730134" expanded="true" signature="4035:4113" ph=" -&gt; ..." />
-                <marker date="1530959730134" expanded="true" signature="4132:4218" ph=" -&gt; ..." />
-                <marker date="1530959730134" expanded="true" signature="4231:5711" ph=" =  ..." />
-                <marker date="1530959730134" expanded="true" signature="4255:4437" ph="= ..." />
-                <marker date="1530959730134" expanded="true" signature="4261:4375" ph="{ Id:Guid ..." />
-                <marker date="1530959730134" expanded="true" signature="4400:4437" ph=" with ..." />
-                <marker date="1530959730134" expanded="true" signature="4525:4967" ph="for i in 0 .. 10 do ..." />
-                <marker date="1530959730134" expanded="true" signature="4588:4802" ph=" = ..." />
-                <marker date="1530959730134" expanded="true" signature="4598:4801" ph=" Id=Guid.NewGuid() ..." />
+                <marker date="1530963753745" expanded="true" signature="25:150" ph="..." />
+                <marker date="1530963753745" expanded="true" signature="217:845" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="244:672" ph=") =  ..." />
+                <marker date="1530963753745" expanded="true" signature="382:545" ph=" : Expression = ..." />
+                <marker date="1530963753745" expanded="true" signature="426:516" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="571:672" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="589:672" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="741:845" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="863:909" ph="when 'tid : comparison&gt; = ..." />
+                <marker date="1530963753745" expanded="true" signature="1061:3421" ph="when 'tid : comparison and 't :&gt; IDto&lt;'tid&gt;&gt; = ..." />
+                <marker date="1530963753745" expanded="true" signature="1110:1249" ph="{ Records : ConcurrentDictionary&lt;'tid,'t&gt; ..." />
+                <marker date="1530963753745" expanded="true" signature="1325:1937" ph=" =  ..." />
+                <marker date="1530963753745" expanded="true" signature="1453:1651" ph=" =  ..." />
+                <marker date="1530963753745" expanded="true" signature="1526:1637" ph=" -&gt; ..." />
+                <marker date="1530963753745" expanded="true" signature="1668:1807" ph="for (name, _) in indexedFields do ..." />
+                <marker date="1530963753745" expanded="true" signature="1815:1936" ph=" Records = ConcurrentDictionary&lt;'tid,'t&gt;() ..." />
+                <marker date="1530963753745" expanded="true" signature="1979:2194" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="2050:2194" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="2063:2194" ph="  ..." />
+                <marker date="1530963753745" expanded="true" signature="2075:2194" ph="for kv in __.IndexValueProviders do ..." />
+                <marker date="1530963753745" expanded="true" signature="2260:2498" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="2571:2787" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="2874:3121" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="3156:3421" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="3201:3421" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="3252:3421" ph=" -&gt; ..." />
+                <marker date="1530963753745" expanded="true" signature="3439:3506" ph="= ..." />
+                <marker date="1530963753745" expanded="true" signature="3443:3506" ph="| QueryById    of obj ..." />
+                <marker date="1530963753745" expanded="true" signature="3531:3601" ph="=     ..." />
+                <marker date="1530963753745" expanded="true" signature="3539:3601" ph="| And of Operation * Operation ..." />
+                <marker date="1530963753745" expanded="true" signature="3646:4907" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="3814:3928" ph=" =  ..." />
+                <marker date="1530963753745" expanded="true" signature="3837:3928" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="4037:4202" ph=" =  ..." />
+                <marker date="1530963753745" expanded="true" signature="4061:4202" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="4080:4187" ph=" -&gt;  ..." />
+                <marker date="1530963753745" expanded="true" signature="4153:4187" ph=" then head::rest ..." />
+                <marker date="1530963753745" expanded="true" signature="4299:4517" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="4314:4517" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="4338:4410" ph=" -&gt; ..." />
+                <marker date="1530963753745" expanded="true" signature="4648:4907" ph=" = ..." />
+                <marker date="1530963753745" expanded="true" signature="4704:4907" ph=" ..." />
+                <marker date="1530963753745" expanded="true" signature="4724:4802" ph=" -&gt; ..." />
+                <marker date="1530963753745" expanded="true" signature="4821:4907" ph=" -&gt; ..." />
+                <marker date="1530963753745" expanded="true" signature="4908:6498" ph="// ..." />
               </folding>
             </state>
           </provider>
@@ -72,14 +70,17 @@
       <file leaf-file-name="IndexExpressionsTests.cs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tests/KeyQuery.CSharpTests/IndexExpressionsTests.cs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="24" column="68" lean-forward="true" selection-start-line="24" selection-start-column="6" selection-end-line="24" selection-end-column="68" />
+            <state relative-caret-position="658">
+              <caret line="83" column="78" lean-forward="true" selection-start-line="83" selection-start-column="78" selection-end-line="83" selection-end-column="78" />
               <folding>
-                <marker date="1530960128805" expanded="true" signature="6:150" ph="..." />
-                <marker date="1530960128805" expanded="true" signature="182:853" ph="{...}" />
-                <marker date="1530960128805" expanded="true" signature="221:851" ph="{...}" />
-                <marker date="1530960128805" expanded="true" signature="299:496" ph="{...}" />
-                <marker date="1530960128805" expanded="true" signature="567:842" ph="{...}" />
+                <marker date="1530964628473" expanded="true" signature="6:150" ph="..." />
+                <marker date="1530964628473" expanded="true" signature="182:3169" ph="{...}" />
+                <marker date="1530964628473" expanded="true" signature="221:3167" ph="{...}" />
+                <marker date="1530964628473" expanded="true" signature="299:601" ph="{...}" />
+                <marker date="1530964628473" expanded="true" signature="672:1222" ph="{...}" />
+                <marker date="1530964628473" expanded="true" signature="1286:3158" ph="{...}" />
+                <marker date="1530964628473" expanded="true" signature="1384:1493" ph="{...}" />
+                <marker date="1530964628473" expanded="true" signature="1531:1740" ph="{...}" />
               </folding>
             </state>
           </provider>
@@ -98,9 +99,9 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/tests/KeyQuery.CSharpTests/UnitTest1.cs" />
         <option value="$PROJECT_DIR$/core/Library.fs" />
         <option value="$PROJECT_DIR$/tests/KeyQuery.CSharpTests/MyDto.cs" />
-        <option value="$PROJECT_DIR$/tests/KeyQuery.CSharpTests/UnitTest1.cs" />
         <option value="$PROJECT_DIR$/tests/KeyQuery.CSharpTests/IndexExpressionsTests.cs" />
       </list>
     </option>
@@ -180,12 +181,12 @@
       <option name="presentableId" value="Default" />
       <updated>1530957984140</updated>
       <workItem from="1530957986896" duration="5000" />
-      <workItem from="1530958030475" duration="2127000" />
+      <workItem from="1530958030475" duration="6183000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="2132000" />
+    <option name="totallyTimeSpent" value="6188000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -203,18 +204,18 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="right" id="Errors In Solution" order="3" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Unit Tests" order="7" visible="true" weight="0.32943678" />
+      <window_info active="true" anchor="bottom" id="Unit Tests" order="7" visible="true" weight="0.21041445" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="NuGet" order="7" weight="0.32943678" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1515625" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Build" weight="0.32943678" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.3995749" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.19978745" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -234,87 +235,108 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="4" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/tests/KeyQuery.CSharpTests/IndexExpressionsTests.cs</url>
+          <line>84</line>
+          <properties documentPath="$PROJECT_DIR$/tests/KeyQuery.CSharpTests/IndexExpressionsTests.cs" initialLine="67">
+            <startOffsets>
+              <startOffset value="3157" />
+            </startOffsets>
+            <endOffsets>
+              <endOffset value="3158" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="6" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/tests/KeyQuery.CSharpTests/MyDto.cs">
+    <entry file="file://$PROJECT_DIR$/core/Library.fs">
       <provider selected="true" editor-type-id="text-editor">
         <state>
+          <caret column="18" selection-start-column="10" selection-end-column="18" />
           <folding>
-            <marker date="1530959825196" expanded="true" signature="45:464" ph="{...}" />
-            <marker date="1530959825196" expanded="true" signature="74:462" ph="{...}" />
-            <marker date="1530959825196" expanded="true" signature="166:291" ph="{...}" />
+            <marker date="1530963753745" expanded="true" signature="25:150" ph="..." />
+            <marker date="1530963753745" expanded="true" signature="217:845" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="244:672" ph=") =  ..." />
+            <marker date="1530963753745" expanded="true" signature="382:545" ph=" : Expression = ..." />
+            <marker date="1530963753745" expanded="true" signature="426:516" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="571:672" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="589:672" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="741:845" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="863:909" ph="when 'tid : comparison&gt; = ..." />
+            <marker date="1530963753745" expanded="true" signature="1061:3421" ph="when 'tid : comparison and 't :&gt; IDto&lt;'tid&gt;&gt; = ..." />
+            <marker date="1530963753745" expanded="true" signature="1110:1249" ph="{ Records : ConcurrentDictionary&lt;'tid,'t&gt; ..." />
+            <marker date="1530963753745" expanded="true" signature="1325:1937" ph=" =  ..." />
+            <marker date="1530963753745" expanded="true" signature="1453:1651" ph=" =  ..." />
+            <marker date="1530963753745" expanded="true" signature="1526:1637" ph=" -&gt; ..." />
+            <marker date="1530963753745" expanded="true" signature="1668:1807" ph="for (name, _) in indexedFields do ..." />
+            <marker date="1530963753745" expanded="true" signature="1815:1936" ph=" Records = ConcurrentDictionary&lt;'tid,'t&gt;() ..." />
+            <marker date="1530963753745" expanded="true" signature="1979:2194" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="2050:2194" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="2063:2194" ph="  ..." />
+            <marker date="1530963753745" expanded="true" signature="2075:2194" ph="for kv in __.IndexValueProviders do ..." />
+            <marker date="1530963753745" expanded="true" signature="2260:2498" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="2571:2787" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="2874:3121" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="3156:3421" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="3201:3421" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="3252:3421" ph=" -&gt; ..." />
+            <marker date="1530963753745" expanded="true" signature="3439:3506" ph="= ..." />
+            <marker date="1530963753745" expanded="true" signature="3443:3506" ph="| QueryById    of obj ..." />
+            <marker date="1530963753745" expanded="true" signature="3531:3601" ph="=     ..." />
+            <marker date="1530963753745" expanded="true" signature="3539:3601" ph="| And of Operation * Operation ..." />
+            <marker date="1530963753745" expanded="true" signature="3646:4907" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="3814:3928" ph=" =  ..." />
+            <marker date="1530963753745" expanded="true" signature="3837:3928" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="4037:4202" ph=" =  ..." />
+            <marker date="1530963753745" expanded="true" signature="4061:4202" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="4080:4187" ph=" -&gt;  ..." />
+            <marker date="1530963753745" expanded="true" signature="4153:4187" ph=" then head::rest ..." />
+            <marker date="1530963753745" expanded="true" signature="4299:4517" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="4314:4517" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="4338:4410" ph=" -&gt; ..." />
+            <marker date="1530963753745" expanded="true" signature="4648:4907" ph=" = ..." />
+            <marker date="1530963753745" expanded="true" signature="4704:4907" ph=" ..." />
+            <marker date="1530963753745" expanded="true" signature="4724:4802" ph=" -&gt; ..." />
+            <marker date="1530963753745" expanded="true" signature="4821:4907" ph=" -&gt; ..." />
+            <marker date="1530963753745" expanded="true" signature="4908:6498" ph="// ..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/Library.fs">
+    <entry file="file://$PROJECT_DIR$/tests/KeyQuery.CSharpTests/MyDto.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="15" selection-start-line="22" selection-start-column="15" selection-end-line="22" selection-end-column="15" />
+        <state relative-caret-position="583">
+          <caret line="46" column="7" lean-forward="true" selection-start-line="46" selection-start-column="7" selection-end-line="46" selection-end-column="7" />
           <folding>
-            <marker date="1530959730134" expanded="true" signature="25:150" ph="..." />
-            <marker date="1530959730134" expanded="true" signature="217:845" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="244:672" ph=") =  ..." />
-            <marker date="1530959730134" expanded="true" signature="382:545" ph=" : Expression = ..." />
-            <marker date="1530959730134" expanded="true" signature="426:516" ph=" ..." />
-            <marker date="1530959730134" expanded="true" signature="571:672" ph=" ..." />
-            <marker date="1530959730134" expanded="true" signature="589:672" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="741:845" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="998:2686" ph="when 'tid : comparison&gt; = ..." />
-            <marker date="1530959730134" expanded="true" signature="1026:1100" ph="{ Records : ConcurrentDictionary&lt;'tid,'t&gt; ..." />
-            <marker date="1530959730134" expanded="true" signature="1155:1478" ph=" =  ..." />
-            <marker date="1530959730134" expanded="true" signature="1266:1400" ph="for name in indexedFields do ..." />
-            <marker date="1530959730134" expanded="true" signature="1408:1477" ph=" Records = ConcurrentDictionary&lt;'tid,'t&gt;() ..." />
-            <marker date="1530959730134" expanded="true" signature="1508:1556" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="1615:1877" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="1721:1808" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="1941:2157" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="2235:2482" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="2508:2686" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="2553:2686" ph=" ..." />
-            <marker date="1530959730134" expanded="true" signature="2620:2669" ph="// todo: ..." />
-            <marker date="1530959730134" expanded="true" signature="2704:2771" ph="= ..." />
-            <marker date="1530959730134" expanded="true" signature="2708:2771" ph="| QueryById    of obj ..." />
-            <marker date="1530959730134" expanded="true" signature="2796:2866" ph="=     ..." />
-            <marker date="1530959730134" expanded="true" signature="2804:2866" ph="| And of Operation * Operation ..." />
-            <marker date="1530959730134" expanded="true" signature="2883:2929" ph="when 'tid : comparison&gt; = ..." />
-            <marker date="1530959730134" expanded="true" signature="2978:4218" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="3146:3260" ph=" =  ..." />
-            <marker date="1530959730134" expanded="true" signature="3169:3260" ph=" ..." />
-            <marker date="1530959730134" expanded="true" signature="3369:3534" ph=" =  ..." />
-            <marker date="1530959730134" expanded="true" signature="3393:3534" ph=" ..." />
-            <marker date="1530959730134" expanded="true" signature="3412:3519" ph=" -&gt;  ..." />
-            <marker date="1530959730134" expanded="true" signature="3485:3519" ph=" then head::rest ..." />
-            <marker date="1530959730134" expanded="true" signature="3610:3828" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="3625:3828" ph=" ..." />
-            <marker date="1530959730134" expanded="true" signature="3649:3721" ph=" -&gt; ..." />
-            <marker date="1530959730134" expanded="true" signature="3959:4218" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="4015:4218" ph=" ..." />
-            <marker date="1530959730134" expanded="true" signature="4035:4113" ph=" -&gt; ..." />
-            <marker date="1530959730134" expanded="true" signature="4132:4218" ph=" -&gt; ..." />
-            <marker date="1530959730134" expanded="true" signature="4231:5711" ph=" =  ..." />
-            <marker date="1530959730134" expanded="true" signature="4255:4437" ph="= ..." />
-            <marker date="1530959730134" expanded="true" signature="4261:4375" ph="{ Id:Guid ..." />
-            <marker date="1530959730134" expanded="true" signature="4400:4437" ph=" with ..." />
-            <marker date="1530959730134" expanded="true" signature="4525:4967" ph="for i in 0 .. 10 do ..." />
-            <marker date="1530959730134" expanded="true" signature="4588:4802" ph=" = ..." />
-            <marker date="1530959730134" expanded="true" signature="4598:4801" ph=" Id=Guid.NewGuid() ..." />
+            <marker date="1530964609418" expanded="true" signature="45:1494" ph="{...}" />
+            <marker date="1530964609418" expanded="true" signature="93:1492" ph="{...}" />
+            <marker date="1530964609418" expanded="true" signature="185:310" ph="{...}" />
+            <marker date="1530964609418" expanded="true" signature="514:808" ph="{...}" />
+            <marker date="1530964609418" expanded="true" signature="853:1059" ph="{...}" />
+            <marker date="1530964609418" expanded="true" signature="1098:1488" ph="{...}" />
+            <marker date="1530964609418" expanded="true" signature="1120:1482" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/KeyQuery.CSharpTests/IndexExpressionsTests.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="24" column="68" lean-forward="true" selection-start-line="24" selection-start-column="6" selection-end-line="24" selection-end-column="68" />
+        <state relative-caret-position="658">
+          <caret line="83" column="78" lean-forward="true" selection-start-line="83" selection-start-column="78" selection-end-line="83" selection-end-column="78" />
           <folding>
-            <marker date="1530960128805" expanded="true" signature="6:150" ph="..." />
-            <marker date="1530960128805" expanded="true" signature="182:853" ph="{...}" />
-            <marker date="1530960128805" expanded="true" signature="221:851" ph="{...}" />
-            <marker date="1530960128805" expanded="true" signature="299:496" ph="{...}" />
-            <marker date="1530960128805" expanded="true" signature="567:842" ph="{...}" />
+            <marker date="1530964628473" expanded="true" signature="6:150" ph="..." />
+            <marker date="1530964628473" expanded="true" signature="182:3169" ph="{...}" />
+            <marker date="1530964628473" expanded="true" signature="221:3167" ph="{...}" />
+            <marker date="1530964628473" expanded="true" signature="299:601" ph="{...}" />
+            <marker date="1530964628473" expanded="true" signature="672:1222" ph="{...}" />
+            <marker date="1530964628473" expanded="true" signature="1286:3158" ph="{...}" />
+            <marker date="1530964628473" expanded="true" signature="1384:1493" ph="{...}" />
+            <marker date="1530964628473" expanded="true" signature="1531:1740" ph="{...}" />
           </folding>
         </state>
       </provider>
