@@ -41,90 +41,124 @@ type IDto<'tid when 'tid : comparison> =
   abstract Id : 'tid
 
 type IAsyncKeyValueStore<'k,'v> =
+  abstract AddOrUpdate : 'k -> 'v -> ('k -> 'v -> 'v) -> 'v Task //Func<'k,'v,'v> -> 'v Task
+  abstract GetOrAdd : 'k -> ('k -> 'v) -> 'v Task // Func<'k,'v> -> 'v Task
   abstract TryAdd : 'k -> 'v -> bool Task
   abstract TryRemove : 'k -> (bool * 'v) Task
   abstract Get : 'k -> 'v Task
+  abstract AllKeys : unit -> 'k ICollection Task
+  abstract AllValues : unit -> 'v ICollection Task
 
 type InMemoryKeyValueStore<'k,'v> () =
   let memory = ConcurrentDictionary<'k,'v>()
   
   interface IAsyncKeyValueStore<'k,'v> with
+    member __.AddOrUpdate key addValue updateValueFactory = 
+      memory.AddOrUpdate(key, addValue, updateValueFactory) |> Task.FromResult
+    member __.GetOrAdd key valueFactory = 
+      memory.GetOrAdd(key, valueFactory) |> Task.FromResult
     member __.TryAdd key value = 
       memory.TryAdd(key, value) |> Task.FromResult
+    member __.TryRemove key =
+      key |> memory.TryRemove |> Task.FromResult
+    member __.Get key =
+      memory.Item key |> Task.FromResult
+    member __.AllKeys () =
+      memory.Keys |> Task.FromResult
+    member __.AllValues () =
+      memory.Values |> Task.FromResult
 
-type IndexStore<'tid when 'tid : comparison> = ConcurrentDictionary<FieldName, ConcurrentDictionary<FieldValue, (Set<'tid>)>>
+type IndexStore<'tid when 'tid : comparison> = ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>
+
+//type PersitenceBuilder<'k,'v> = Func<IAsyncKeyValueStore<'k,'v>>
 
 type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
-  { Records : IAsyncKeyValueStore<'tid,'t> // ConcurrentDictionary<'tid,'t>
+  { Records : IAsyncKeyValueStore<'tid,'t>
     Indexes : IndexStore<'tid>
-    IndexValueProviders : IDictionary<string, ('t -> string)> 
-  }
-    static member Build (indexedMembers:Expression<Func<'t, string>> array) = 
-      let indexes = ConcurrentDictionary<FieldName, ConcurrentDictionary<FieldValue, (Set<'tid>)>>()
-      let indexedFields = 
-         indexedMembers
-         |> Array.map (
-              fun exp ->
-                let path = Visitors.getIndexName<'t, string> exp
-                path, exp.Compile().Invoke
-            )
-         
-      for (name, _) in indexedFields do
-        let v = ConcurrentDictionary<FieldValue, (Set<'tid>)>()
-        indexes.TryAdd(name, v) |> ignore
-      { Records = InMemoryKeyValueStore<'tid,'t>()
-        Indexes = indexes
-        IndexValueProviders = indexedFields |> dict }
+    IndexValueProviders : IDictionary<string, ('t -> string)> }
+  
+  static member Build (storeType:Type) (indexedMembers:Expression<Func<'t, string>> array) =
+    let buildPersistence () =
+      let typ = storeType.MakeGenericType(typeof<'tid>, typeof<'t>)
+      typ |> Activator.CreateInstance |> unbox<IAsyncKeyValueStore<'tid,'t>>
       
-      member __.Insert (record:'t) =
-        let id = record.Id
-        task {
-          let! rs = __.Records.TryAdd id record
-          if rs
-          then 
+    let buildFieldIndexPersistence () =
+      let typ = storeType.MakeGenericType(typeof<FieldValue>, typeof<Set<'tid>>)
+      typ |> Activator.CreateInstance |> unbox<IAsyncKeyValueStore<FieldValue, Set<'tid>>>
+      
+    let indexes = ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>()
+    let indexedFields = 
+       indexedMembers
+       |> Array.map (
+            fun exp ->
+              let path = Visitors.getIndexName<'t, string> exp
+              path, exp.Compile().Invoke
+          )
+       
+    for (name, _) in indexedFields do
+      let v = buildFieldIndexPersistence ()
+      indexes.TryAdd(name, v) |> ignore
+      
+    { Records = buildPersistence()
+      Indexes = indexes
+      IndexValueProviders = indexedFields |> dict }
+    
+    member __.Insert (record:'t) =
+      let id = record.Id
+      task {
+        let! rs = __.Records.TryAdd id record
+        if rs
+        then 
+          for kv in __.IndexValueProviders do
+            let value = kv.Value record
+            do! __.Index record.Id kv.Key value
+          return true
+        else
+          return true
+      }
+      
+    member __.Index id (fieldName:FieldName) (value:obj) =
+      let index = __.Indexes.Item fieldName
+      let fieldValue = value.ToString()
+      task {
+        let! currentIds = index.GetOrAdd fieldValue (fun _ -> Set.empty)
+        let ids = currentIds |> Set.add id
+        index.AddOrUpdate fieldValue ids (fun _ _ -> ids) |> ignore
+      }
+      
+    member __.SearchByIndex (fieldName:FieldName) (value:obj) : ('t array) Task =
+      let index = __.Indexes.Item fieldName
+      let fieldValue = value.ToString()
+      task {
+        let! items = index.GetOrAdd fieldValue (fun _ -> Set.empty)
+        return! 
+          items
+          |> Set.toSeq
+          |> Seq.map (fun id -> __.Records.Get id)
+          |> Seq.toArray
+          |> Task.WhenAll
+      }
+      
+    member __.RemoveIndexedValue (fieldName:FieldName) (value:obj) recordId =
+      let index = __.Indexes.Item fieldName
+      let fieldValue = value.ToString()
+      task {
+        let! current = index.GetOrAdd fieldValue (fun _ -> Set.empty)
+        let ids = current |> Set.remove recordId
+        index.AddOrUpdate fieldValue ids (fun _ _ -> ids) |> ignore
+      }
+      
+    member __.Remove id =
+      task {
+        let! rs = __.Records.TryRemove id
+        match rs with
+        | false, _ -> return false
+        | true, record ->
             for kv in __.IndexValueProviders do
               let value = kv.Value record
-              __.Index record.Id kv.Key value
+              do! __.RemoveIndexedValue kv.Key value record.Id
             return true
-          else
-            return true
-        }
-      member __.Index id (fieldName:FieldName) (value:obj) =
-        let index = __.Indexes.Item fieldName
-        let fieldValue = value.ToString()
-        let ids = index.GetOrAdd(fieldValue, fun _ -> Set.empty) |> Set.add id
-        index.AddOrUpdate(fieldValue, ids, fun _ _ -> ids) |> ignore
-        
-      member __.SearchByIndex (fieldName:FieldName) (value:obj) : ('t array) Task =
-        let index = __.Indexes.Item fieldName
-        let fieldValue = value.ToString()
-        task {
-          return! 
-            index.GetOrAdd(fieldValue, fun _ -> Set.empty)
-            |> Set.toSeq
-            |> Seq.map (fun id -> __.Records.Get id)
-            |> Seq.toArray
-            |> Task.WhenAll
-        }
-        
-      member __.RemoveIndexedValue (fieldName:FieldName) (value:obj) recordId =
-        let index = __.Indexes.Item fieldName
-        let fieldValue = value.ToString()
-        let ids = index.GetOrAdd(fieldValue, fun _ -> Set.empty) |> Set.remove recordId
-        index.AddOrUpdate(fieldValue, ids, fun _ _ -> ids) |> ignore
-        
-      member __.Remove id =
-        task {
-          let! rs = __.Records.TryRemove id
-          match rs with
-          | false, _ -> return false
-          | true, record ->
-              for kv in __.IndexValueProviders do
-                let value = kv.Value record
-                __.RemoveIndexedValue kv.Key value record.Id
-              return true
-        }
-
+      }
 
 type Operation =
   | QueryById    of obj
@@ -135,8 +169,6 @@ type Operation =
 [<RequireQualifiedAccess>]
 module Operation =
 
-  //https://stackoverflow.com/questions/20248006/f-intersection-of-lists
-  
   let rec mem<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> (list:'t list) (x:'t) = 
     match list with
     | [] -> false
@@ -153,20 +185,24 @@ module Operation =
 
   let rec execute<'tid,'t when 'tid : comparison and 't :> IDto<'tid> and 't : equality> (store : DataStore<'tid,'t>) operation =
     let exec = execute store
-    match operation with
-    | QueryById idValue ->
-        let id = unbox<'tid> idValue
-        [store.Records.Item id]
-    | QueryByField (fileName, fieldValue) ->
-        store.SearchByIndex fileName fieldValue |> Seq.toList
-    | And (op1,op2) ->
-        let a = exec op1
-        let b = exec op2
-        intersection a b
-    | Or (op1,op2) ->
-        let a = exec op1
-        let b = exec op2
-        (a @ b) |> List.distinct
+    task {
+      match operation with
+      | QueryById idValue ->
+          let id = unbox<'tid> idValue
+          let! rs = store.Records.Get id
+          return [rs]
+      | QueryByField (fileName, fieldValue) ->
+          let! rs = store.SearchByIndex fileName fieldValue
+          return rs |> Seq.toList
+      | And (op1,op2) ->
+          let! a = exec op1
+          let! b = exec op2
+          return intersection a b
+      | Or (op1,op2) ->
+          let! a = exec op1
+          let! b = exec op2
+          return (a @ b) |> List.distinct
+    }
 
 //
 //module Test = 

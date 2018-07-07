@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.FSharp.Core;
 using NFluent;
 using Xunit;
 
@@ -37,25 +39,27 @@ namespace KeyQuery.CSharpTests
     }
 
     [Fact]
-    public void InsertRecord_should_index_members()
+    public async Task InsertRecord_should_index_members()
     {
-      var store = DataStore<Guid, MyDto>.Build(new Expression<Func<MyDto, string>>[]
-      {
-        dto => dto.FirstName,
-        dto => dto.Lastname,
-        dto => dto.Birth.Day.ToString(),
-      });
+      var store = DataStore<Guid, MyDto>.Build(
+        typeof(InMemoryKeyValueStore<,>),
+        new Expression<Func<MyDto, string>>[]
+        {
+          dto => dto.FirstName,
+          dto => dto.Lastname,
+          dto => dto.Birth.Day.ToString()
+        });
 
       for (var i = 0; i < 10; i++)
       {
         var d = 1000 + i * 200;
         var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i, new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
-        store.Insert(dto);
+        await store.Insert(dto);
       }
 
-      var someId = store.Records.Keys.First();
-      var resultsById = OperationModule.execute(store, Operation.NewQueryById(someId)).ToList();
-      var expectedById = store.Records.Values.First();
+      var someId = (await store.Records.AllKeys()).First();
+      var resultsById = (await OperationModule.execute(store, Operation.NewQueryById(someId))).ToList();
+      var expectedById = (await store.Records.AllValues()).First();
       
       Check.That(resultsById).CountIs(1);
       Check.That(resultsById.Single().FirstName).IsEqualTo(expectedById.FirstName);
@@ -63,19 +67,19 @@ namespace KeyQuery.CSharpTests
       Check.That(resultsById.Single().Score).IsEqualTo(expectedById.Score);
 
       var expectedByAndoperation =
-        OperationModule.execute(store,
+        (await OperationModule.execute(store,
             Operation.NewAnd(
               Operation.NewQueryByField("FirstName", "firstname 5"),
-              Operation.NewQueryByField("Lastname", "lastname 5"))).ToList();
+              Operation.NewQueryByField("Lastname", "lastname 5")))).ToList();
 
       Check.That(expectedByAndoperation).CountIs(1);
       Check.That(expectedByAndoperation.Single().FirstName).IsEqualTo("firstname 5");
 
       var expectedByOroperation =
-        OperationModule.execute(store,
+        (await OperationModule.execute(store,
           Operation.NewOr(
             Operation.NewQueryByField("FirstName", "firstname 5"),
-            Operation.NewQueryByField("Lastname", "lastname 4")))
+            Operation.NewQueryByField("Lastname", "lastname 4"))))
           .OrderBy(r => r.Score)
           .ToList();
       
@@ -84,7 +88,7 @@ namespace KeyQuery.CSharpTests
       Check.That(expectedByOroperation[1].FirstName).IsEqualTo("firstname 5");
       
       var expectedByOroperation2 =
-        OperationModule.execute(store,
+        (await OperationModule.execute(store,
             Operation.NewOr(
                 Operation.NewQueryByField("FirstName", "firstname 5"),
                 Operation.NewOr(
@@ -92,7 +96,7 @@ namespace KeyQuery.CSharpTests
                     Operation.NewQueryByField("Lastname", "lastname 2")
                   )
               )
-            )
+            ))
           .OrderBy(r => r.Score)
           .ToList();
       

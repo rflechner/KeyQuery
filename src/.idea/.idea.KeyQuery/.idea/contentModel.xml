@@ -23,6 +23,7 @@
             </e>
           </e>
         </e>
+        <e p="ServiceFabAsyncKeyValueStore.cs" t="Include" />
         <e p="ServiceFabricStorageTests.cs" t="Include" />
       </e>
     </e>
