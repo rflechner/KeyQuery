@@ -63,8 +63,8 @@ namespace KeyQuery.CSharpTests
       Check.That(resultsById.Single().Score).IsEqualTo(expectedById.Score);
 
       var expectedByAndoperation =
-        OperationModule.binaryExecute(store,
-            BinaryOperation.NewAnd(
+        OperationModule.execute(store,
+            Operation.NewAnd(
               Operation.NewQueryByField("FirstName", "firstname 5"),
               Operation.NewQueryByField("Lastname", "lastname 5"))).ToList();
 
@@ -72,8 +72,8 @@ namespace KeyQuery.CSharpTests
       Check.That(expectedByAndoperation.Single().FirstName).IsEqualTo("firstname 5");
 
       var expectedByOroperation =
-        OperationModule.binaryExecute(store,
-          BinaryOperation.NewOr(
+        OperationModule.execute(store,
+          Operation.NewOr(
             Operation.NewQueryByField("FirstName", "firstname 5"),
             Operation.NewQueryByField("Lastname", "lastname 4")))
           .OrderBy(r => r.Score)
@@ -82,6 +82,24 @@ namespace KeyQuery.CSharpTests
       Check.That(expectedByOroperation).CountIs(2);
       Check.That(expectedByOroperation[0].FirstName).IsEqualTo("firstname 4");
       Check.That(expectedByOroperation[1].FirstName).IsEqualTo("firstname 5");
+      
+      var expectedByOroperation2 =
+        OperationModule.execute(store,
+            Operation.NewOr(
+                Operation.NewQueryByField("FirstName", "firstname 5"),
+                Operation.NewOr(
+                    Operation.NewQueryByField("Lastname", "lastname 4"),
+                    Operation.NewQueryByField("Lastname", "lastname 2")
+                  )
+              )
+            )
+          .OrderBy(r => r.Score)
+          .ToList();
+      
+      Check.That(expectedByOroperation2).CountIs(3);
+      Check.That(expectedByOroperation2[0].FirstName).IsEqualTo("firstname 2");
+      Check.That(expectedByOroperation2[1].FirstName).IsEqualTo("firstname 4");
+      Check.That(expectedByOroperation2[2].FirstName).IsEqualTo("firstname 5");
     }
     
   }

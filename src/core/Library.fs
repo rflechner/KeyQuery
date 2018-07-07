@@ -100,9 +100,7 @@ type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
 
 type Operation =
   | QueryById    of obj
-  | QueryByField of FieldName * value:obj
-  
-type BinaryOperation =    
+  | QueryByField of FieldName * value:obj    
   | And of Operation * Operation
   | Or of Operation * Operation
 
@@ -125,17 +123,14 @@ module Operation =
         else rest
     | [] -> []
 
-  let execute<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> (store : DataStore<'tid,'t>) =
-    function
+  let rec execute<'tid,'t when 'tid : comparison and 't :> IDto<'tid> and 't : equality> (store : DataStore<'tid,'t>) operation =
+    let exec = execute store
+    match operation with
     | QueryById idValue ->
         let id = unbox<'tid> idValue
         [store.Records.Item id]
     | QueryByField (fileName, fieldValue) ->
         store.SearchByIndex fileName fieldValue |> Seq.toList
-
-  let binaryExecute<'tid,'t when 'tid : comparison and 't :> IDto<'tid> and 't : equality> (store : DataStore<'tid,'t>) operation =
-    let exec = execute store
-    match operation with
     | And (op1,op2) ->
         let a = exec op1
         let b = exec op2
@@ -144,6 +139,7 @@ module Operation =
         let a = exec op1
         let b = exec op2
         (a @ b) |> List.distinct
+
 //
 //module Test = 
 //
