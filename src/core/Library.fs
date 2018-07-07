@@ -5,6 +5,9 @@ open System.Reflection
 open System.Collections.Generic
 open System.Collections.Concurrent
 open System.Linq.Expressions
+open System.Threading
+open System.Threading.Tasks
+open FSharp.Control.Tasks
 
 type FieldName = string
 type FieldValue = string
@@ -37,10 +40,22 @@ module Visitors =
 type IDto<'tid when 'tid : comparison> =
   abstract Id : 'tid
 
+type IAsyncKeyValueStore<'k,'v> =
+  abstract TryAdd : 'k -> 'v -> bool Task
+  abstract TryRemove : 'k -> (bool * 'v) Task
+  abstract Get : 'k -> 'v Task
+
+type InMemoryKeyValueStore<'k,'v> () =
+  let memory = ConcurrentDictionary<'k,'v>()
+  
+  interface IAsyncKeyValueStore<'k,'v> with
+    member __.TryAdd key value = 
+      memory.TryAdd(key, value) |> Task.FromResult
+
 type IndexStore<'tid when 'tid : comparison> = ConcurrentDictionary<FieldName, ConcurrentDictionary<FieldValue, (Set<'tid>)>>
 
 type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
-  { Records : ConcurrentDictionary<'tid,'t>
+  { Records : IAsyncKeyValueStore<'tid,'t> // ConcurrentDictionary<'tid,'t>
     Indexes : IndexStore<'tid>
     IndexValueProviders : IDictionary<string, ('t -> string)> 
   }
@@ -57,30 +72,40 @@ type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
       for (name, _) in indexedFields do
         let v = ConcurrentDictionary<FieldValue, (Set<'tid>)>()
         indexes.TryAdd(name, v) |> ignore
-      { Records = ConcurrentDictionary<'tid,'t>()
+      { Records = InMemoryKeyValueStore<'tid,'t>()
         Indexes = indexes
         IndexValueProviders = indexedFields |> dict }
       
       member __.Insert (record:'t) =
         let id = record.Id
-        if __.Records.TryAdd (id, record)
-        then 
-          for kv in __.IndexValueProviders do
-            let value = kv.Value record
-            __.Index record.Id kv.Key value
-      
+        task {
+          let! rs = __.Records.TryAdd id record
+          if rs
+          then 
+            for kv in __.IndexValueProviders do
+              let value = kv.Value record
+              __.Index record.Id kv.Key value
+            return true
+          else
+            return true
+        }
       member __.Index id (fieldName:FieldName) (value:obj) =
         let index = __.Indexes.Item fieldName
         let fieldValue = value.ToString()
         let ids = index.GetOrAdd(fieldValue, fun _ -> Set.empty) |> Set.add id
         index.AddOrUpdate(fieldValue, ids, fun _ _ -> ids) |> ignore
         
-      member __.SearchByIndex (fieldName:FieldName) (value:obj) =
+      member __.SearchByIndex (fieldName:FieldName) (value:obj) : ('t array) Task =
         let index = __.Indexes.Item fieldName
         let fieldValue = value.ToString()
-        index.GetOrAdd(fieldValue, fun _ -> Set.empty)
-        |> Set.toSeq
-        |> Seq.map (fun id -> __.Records.Item id)
+        task {
+          return! 
+            index.GetOrAdd(fieldValue, fun _ -> Set.empty)
+            |> Set.toSeq
+            |> Seq.map (fun id -> __.Records.Get id)
+            |> Seq.toArray
+            |> Task.WhenAll
+        }
         
       member __.RemoveIndexedValue (fieldName:FieldName) (value:obj) recordId =
         let index = __.Indexes.Item fieldName
@@ -89,13 +114,16 @@ type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
         index.AddOrUpdate(fieldValue, ids, fun _ _ -> ids) |> ignore
         
       member __.Remove id =
-        match __.Records.TryRemove id with
-        | false, _ -> false
-        | true, record ->
-            for kv in __.IndexValueProviders do
-              let value = kv.Value record
-              __.RemoveIndexedValue kv.Key value record.Id
-            true
+        task {
+          let! rs = __.Records.TryRemove id
+          match rs with
+          | false, _ -> return false
+          | true, record ->
+              for kv in __.IndexValueProviders do
+                let value = kv.Value record
+                __.RemoveIndexedValue kv.Key value record.Id
+              return true
+        }
 
 
 type Operation =

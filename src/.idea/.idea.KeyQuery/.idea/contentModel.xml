@@ -23,6 +23,7 @@
             </e>
           </e>
         </e>
+        <e p="ServiceFabricStorageTests.cs" t="Include" />
       </e>
     </e>
     <e p="C:\Users\flechner\.nuget\packages\xunit.runner.visualstudio\2.3.1\build\netcoreapp1.0\xunit.runner.reporters.netcoreapp10.dll" t="Include" />
