@@ -41,8 +41,8 @@ type IDto<'tid when 'tid : comparison> =
   abstract Id : 'tid
 
 type IAsyncKeyValueStore<'k,'v> =
-  abstract AddOrUpdate : 'k -> 'v -> ('k -> 'v -> 'v) -> 'v Task //Func<'k,'v,'v> -> 'v Task
-  abstract GetOrAdd : 'k -> ('k -> 'v) -> 'v Task // Func<'k,'v> -> 'v Task
+  abstract AddOrUpdate : 'k -> 'v -> ('k -> 'v -> 'v) -> 'v Task
+  abstract GetOrAdd : 'k -> ('k -> 'v) -> 'v Task
   abstract TryAdd : 'k -> 'v -> bool Task
   abstract TryRemove : 'k -> (bool * 'v) Task
   abstract Get : 'k -> 'v Task
@@ -70,8 +70,6 @@ type InMemoryKeyValueStore<'k,'v> () =
 
 type IndexStore<'tid when 'tid : comparison> = ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>
 
-//type PersitenceBuilder<'k,'v> = Func<IAsyncKeyValueStore<'k,'v>>
-
 type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
   { Records : IAsyncKeyValueStore<'tid,'t>
     Indexes : IndexStore<'tid>
@@ -79,18 +77,9 @@ type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
   
   static member Build 
     (buildPersistence:Func<IAsyncKeyValueStore<'tid,'t>>) 
-    (buildFieldIndexPersistence:Func<IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>)
+    (buildFieldIndexPersistence:Func<string, Task<IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>>)
     (indexedMembers:Expression<Func<'t, string>> array) =
   
-//    let buildPersistence () =
-//      let typ = storeType.MakeGenericType(typeof<'tid>, typeof<'t>)
-//      Activator.CreateInstance(typ, storeTypeParams) |> unbox<IAsyncKeyValueStore<'tid,'t>>
-//      
-//    let buildFieldIndexPersistence () =
-//      let typ = storeType.MakeGenericType(typeof<FieldValue>, typeof<Set<'tid>>)
-//      //FSharp.Collections.Set
-//      Activator.CreateInstance(typ, storeTypeParams) |> unbox<IAsyncKeyValueStore<FieldValue, Set<'tid>>>
-//      
     let indexes = ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>()
     let indexedFields = 
        indexedMembers
@@ -101,7 +90,7 @@ type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
           )
        
     for (name, _) in indexedFields do
-      let v = buildFieldIndexPersistence.Invoke()
+      let v = (buildFieldIndexPersistence.Invoke name).Result
       indexes.TryAdd(name, v) |> ignore
       
     { Records = buildPersistence.Invoke()
