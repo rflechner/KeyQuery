@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using KeyQuery.ServiceFabric;
 using Microsoft.FSharp.Collections;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
@@ -32,7 +33,7 @@ namespace KeyQuery.CSharpTests
       
       var store = DataStore<Guid, MyDto>.Build(
         () => new ServiceFabAsyncKeyValueStore<Guid, MyDto>(wrappedReliableDictionary, transactionBuilder), 
-        () => new ServiceFabAsyncKeyValueStore<string, FSharpSet<Guid>>(new MockReliableDictionary<string, FSharpSet<Guid>>(new Uri("fabric://popo")), transactionBuilder),
+        async _ => new ServiceFabAsyncKeyValueStore<string, FSharpSet<Guid>>(new MockReliableDictionary<string, FSharpSet<Guid>>(new Uri("fabric://popo")), transactionBuilder),
         new Expression<Func<MyDto, string>>[]
         {
           dto => dto.FirstName,

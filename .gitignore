@@ -215,3 +215,7 @@ FakesAssemblies/
 **/*.Server/GeneratedArtifacts
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
+
+src/\.idea/\.idea\.KeyQuery/\.idea/workspace\.xml
+
+src/\.idea/\.idea\.KeyQuery/\.idea/

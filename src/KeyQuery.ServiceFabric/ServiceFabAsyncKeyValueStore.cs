@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,10 +6,9 @@ using Microsoft.FSharp.Core;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
 
-namespace KeyQuery.CSharpTests
+namespace KeyQuery.ServiceFabric
 {
-  public class ServiceFabAsyncKeyValueStore<TKey, TValue> 
-    : IAsyncKeyValueStore<TKey, TValue> where TKey : IComparable<TKey>, IEquatable<TKey>
+  public class ServiceFabAsyncKeyValueStore<TKey, TValue> : IAsyncKeyValueStore<TKey, TValue> where TKey : IComparable<TKey>, IEquatable<TKey>
   {
     private readonly IReliableDictionary<TKey, TValue> wrappedReliableDictionary;
     private readonly Func<ITransaction> transactionBuilder;

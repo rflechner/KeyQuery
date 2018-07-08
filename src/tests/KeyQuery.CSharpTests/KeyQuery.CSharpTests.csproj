@@ -13,5 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\KeyQuery.fsproj" />
+    <ProjectReference Include="..\..\KeyQuery.ServiceFabric\KeyQuery.ServiceFabric.csproj" />
   </ItemGroup>
 </Project>

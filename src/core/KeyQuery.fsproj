@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Library.fs" />
+    <Compile Include="Core.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="TaskBuilder.fs" Version="2.0.0" />

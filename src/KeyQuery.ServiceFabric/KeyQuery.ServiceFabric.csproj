@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\core\KeyQuery.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.ServiceFabric.Data.Interfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\..\..\..\Users\flechner\.nuget\packages\microsoft.servicefabric.data.interfaces\3.1.283\lib\netstandard2.0\Microsoft.ServiceFabric.Data.Interfaces.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

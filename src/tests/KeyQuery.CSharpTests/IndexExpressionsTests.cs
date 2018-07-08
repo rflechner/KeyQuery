@@ -44,7 +44,7 @@ namespace KeyQuery.CSharpTests
     {
       var store = DataStore<Guid, MyDto>.Build(
         () => new InMemoryKeyValueStore<Guid, MyDto>(), 
-        () => new InMemoryKeyValueStore<string, FSharpSet<Guid>>(), 
+        async _ => new InMemoryKeyValueStore<string, FSharpSet<Guid>>(), 
         new Expression<Func<MyDto, string>>[]
         {
           dto => dto.FirstName,
