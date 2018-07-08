@@ -2,6 +2,9 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.FSharp.Collections;
+using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
 using NFluent;
 using ServiceFabric.Mocks;
 using ServiceFabric.Mocks.ReliableCollections;
@@ -24,8 +27,12 @@ namespace KeyQuery.CSharpTests
     [Fact]
     public async Task InsertRecord_should_index_members()
     {
+      IReliableDictionary<Guid, MyDto> wrappedReliableDictionary = new MockReliableDictionary<Guid, MyDto>(new Uri("fabric://popo"));
+      Func<ITransaction> transactionBuilder = () => new MockTransaction(null, 1);
+      
       var store = DataStore<Guid, MyDto>.Build(
-        typeof(ServiceFabAsyncKeyValueStore<,>),
+        () => new ServiceFabAsyncKeyValueStore<Guid, MyDto>(wrappedReliableDictionary, transactionBuilder), 
+        () => new ServiceFabAsyncKeyValueStore<string, FSharpSet<Guid>>(new MockReliableDictionary<string, FSharpSet<Guid>>(new Uri("fabric://popo")), transactionBuilder),
         new Expression<Func<MyDto, string>>[]
         {
           dto => dto.FirstName,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
 using NFluent;
 using Xunit;
@@ -42,7 +43,8 @@ namespace KeyQuery.CSharpTests
     public async Task InsertRecord_should_index_members()
     {
       var store = DataStore<Guid, MyDto>.Build(
-        typeof(InMemoryKeyValueStore<,>),
+        () => new InMemoryKeyValueStore<Guid, MyDto>(), 
+        () => new InMemoryKeyValueStore<string, FSharpSet<Guid>>(), 
         new Expression<Func<MyDto, string>>[]
         {
           dto => dto.FirstName,

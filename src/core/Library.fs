@@ -77,15 +77,20 @@ type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
     Indexes : IndexStore<'tid>
     IndexValueProviders : IDictionary<string, ('t -> string)> }
   
-  static member Build (storeType:Type) (indexedMembers:Expression<Func<'t, string>> array) =
-    let buildPersistence () =
-      let typ = storeType.MakeGenericType(typeof<'tid>, typeof<'t>)
-      typ |> Activator.CreateInstance |> unbox<IAsyncKeyValueStore<'tid,'t>>
-      
-    let buildFieldIndexPersistence () =
-      let typ = storeType.MakeGenericType(typeof<FieldValue>, typeof<Set<'tid>>)
-      typ |> Activator.CreateInstance |> unbox<IAsyncKeyValueStore<FieldValue, Set<'tid>>>
-      
+  static member Build 
+    (buildPersistence:Func<IAsyncKeyValueStore<'tid,'t>>) 
+    (buildFieldIndexPersistence:Func<IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>)
+    (indexedMembers:Expression<Func<'t, string>> array) =
+  
+//    let buildPersistence () =
+//      let typ = storeType.MakeGenericType(typeof<'tid>, typeof<'t>)
+//      Activator.CreateInstance(typ, storeTypeParams) |> unbox<IAsyncKeyValueStore<'tid,'t>>
+//      
+//    let buildFieldIndexPersistence () =
+//      let typ = storeType.MakeGenericType(typeof<FieldValue>, typeof<Set<'tid>>)
+//      //FSharp.Collections.Set
+//      Activator.CreateInstance(typ, storeTypeParams) |> unbox<IAsyncKeyValueStore<FieldValue, Set<'tid>>>
+//      
     let indexes = ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>()
     let indexedFields = 
        indexedMembers
@@ -96,10 +101,10 @@ type DataStore<'tid,'t when 'tid : comparison and 't :> IDto<'tid>> =
           )
        
     for (name, _) in indexedFields do
-      let v = buildFieldIndexPersistence ()
+      let v = buildFieldIndexPersistence.Invoke()
       indexes.TryAdd(name, v) |> ignore
       
-    { Records = buildPersistence()
+    { Records = buildPersistence.Invoke()
       Indexes = indexes
       IndexValueProviders = indexedFields |> dict }
     
