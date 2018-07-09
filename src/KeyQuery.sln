@@ -1,10 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "KeyQuery", "core\KeyQuery.fsproj", "{10CCFA03-D47C-458F-9926-4F0469302600}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "KeyQuery", "core\KeyQuery.fsproj", "{10CCFA03-D47C-458F-9926-4F0469302600}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyQuery.CSharpTests", "tests\KeyQuery.CSharpTests\KeyQuery.CSharpTests.csproj", "{8B81E7BA-EFAE-48AB-B5BB-251E10E01C84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyQuery.CSharpTests", "tests\KeyQuery.CSharpTests\KeyQuery.CSharpTests.csproj", "{8B81E7BA-EFAE-48AB-B5BB-251E10E01C84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyQuery.ServiceFabric", "KeyQuery.ServiceFabric\KeyQuery.ServiceFabric.csproj", "{C2E2AF38-2B5C-4B14-80C3-C7147B0F6423}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyQuery.ServiceFabric", "KeyQuery.ServiceFabric\KeyQuery.ServiceFabric.csproj", "{C2E2AF38-2B5C-4B14-80C3-C7147B0F6423}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +27,11 @@ Global
 		{C2E2AF38-2B5C-4B14-80C3-C7147B0F6423}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2E2AF38-2B5C-4B14-80C3-C7147B0F6423}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2E2AF38-2B5C-4B14-80C3-C7147B0F6423}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E5077309-9C19-4A6B-8091-7962C44D3D9F}
 	EndGlobalSection
 EndGlobal
