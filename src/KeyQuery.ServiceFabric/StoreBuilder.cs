@@ -21,7 +21,7 @@ namespace KeyQuery.ServiceFabric
 
       async Task<IAsyncKeyValueStore<string, FSharpSet<TId>>> BuildFieldIndexPersistence(string memberName)
       {
-        var dictionary = await stateManager.GetOrAddAsync<IReliableDictionary<string, FSharpSet<TId>>>(name);
+        var dictionary = await stateManager.GetOrAddAsync<IReliableDictionary<string, FSharpSet<TId>>>($"{name}_{memberName}");
         
         return new ServiceFabAsyncKeyValueStore<string, FSharpSet<TId>>(dictionary, transactionBuilder);
       }

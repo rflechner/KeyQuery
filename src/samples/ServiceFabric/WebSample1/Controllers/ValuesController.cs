@@ -1,32 +1,85 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using KeyQuery;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
 
 namespace WebSample1.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private readonly IReliableStateManager stateManager;
+        private readonly DataStore<Guid, Customer> store;
+
+        public ValuesController(IReliableStateManager stateManager, DataStore<Guid, Customer> store)
+        {
+            this.stateManager = stateManager;
+            this.store = store;
+        }
+
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ICollection<Customer>> Get(CancellationToken cancellationToken)
         {
-            return new string[] { "value1", "value2" };
+            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customers");
+
+            var results = new List<Customer>();
+
+            using (var tx = stateManager.CreateTransaction())
+            {
+                var enumerable = await customers.CreateEnumerableAsync(tx);
+                var enumerator = enumerable.GetAsyncEnumerator();
+                while (await enumerator.MoveNextAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
+                {
+                    results.Add(enumerator.Current.Value);
+                }
+            }
+
+            return results;
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<Customer> Get(Guid id)
         {
-            return "value";
+            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customers");
+
+            using (var tx = stateManager.CreateTransaction())
+            {
+                var result = await customers.TryGetValueAsync(tx, id);
+                if (result.HasValue)
+                    return result.Value;
+                return null;
+                //return StatusCode((int) HttpStatusCode.NotFound);
+            }
         }
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string value)
+        public async Task Post([FromBody]string value)
         {
+            var id = Guid.NewGuid();
+            var dto = new Customer(id, value, $"Lastname {DateTime.Now.Ticks}",
+                DateTime.Now.Millisecond, new DateTime(1985, 02, 11));
+
+            await store.Insert(dto);
+
+            //var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customers");
+
+            //using (var tx = stateManager.CreateTransaction())
+            //{
+            //    var id = Guid.NewGuid();
+            //    var dto = new Customer(id, value, $"Lastname {DateTime.Now.Ticks}",
+            //        DateTime.Now.Millisecond, new DateTime(1985, 02, 11));
+            //    await customers.AddAsync(tx, id, dto);
+            //    await tx.CommitAsync();
+            //}
         }
 
         // PUT api/values/5

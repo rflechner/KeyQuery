@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Fabric;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using KeyQuery;
+using KeyQuery.ServiceFabric;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
@@ -36,11 +39,18 @@ namespace WebSample1
                     {
                         ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
 
+                        DataStore<Guid, Customer> store = this.StateManager.AddDocumentStore<Guid, Customer>(new Expression<Func<Customer, string>>[]
+                        {
+                            model => model.FirstName,
+                            model => model.Birth.Year.ToString()
+                        }).Result;
+
                         return new WebHostBuilder()
                                     .UseKestrel()
                                     .ConfigureServices(
                                         services => services
                                             .AddSingleton<StatefulServiceContext>(serviceContext)
+                                            .AddSingleton(store)
                                             .AddSingleton<IReliableStateManager>(this.StateManager))
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseStartup<Startup>()

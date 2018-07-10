@@ -7,6 +7,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Core" Version="4.5.0" />
-    <PackageReference Include="Microsoft.ServiceFabric.Data.Interfaces" Version="3.1.283" />
+    <PackageReference Include="Microsoft.ServiceFabric.Data.Interfaces" Version="3.1.301" />
   </ItemGroup>
 </Project>
