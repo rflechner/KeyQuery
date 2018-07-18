@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,7 +57,7 @@ namespace KeyQuery.Core
 
     public static class ExpressionHelpers
     {
-        public static string GetIndexName<T, TR>(Expression<Func<T, TR>> expression)
+        public static string GetIndexName<T, TR>(this Expression<Func<T, TR>> expression)
         {
             var visitor = new PropertyVisitor();
             visitor.Visit(expression);
@@ -110,20 +111,51 @@ namespace KeyQuery.Core
             => Task.FromResult(memory.Values);
     }
 
-    //type IndexStore<'tid when 'tid : comparison> = ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, (Set<'tid>)>>
-
     public class IndexStore<TId>
     {
-        private readonly ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, HashSet<TId>>> stores;
-
         public IndexStore()
         {
-            stores = new ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, HashSet<TId>>>();
+            Stores = new ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, HashSet<TId>>>();
         }
 
-        public ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, HashSet<TId>>> Stores => stores;
+        public ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, HashSet<TId>>> Stores { get; }
     }
 
+    public class DataStore<TId, T>
+        where T : IDto<TId>
+    {
+        private IAsyncKeyValueStore<TId, T> records;
+        private IndexStore<TId> indexes;
+        private IDictionary<string, Func<T, string>> indexValueProviders;
 
+        public DataStore(IAsyncKeyValueStore<TId, T> records, IndexStore<TId> indexes, IDictionary<string, Func<T, string>> indexValueProviders)
+        {
+            this.records = records;
+            this.indexes = indexes;
+            this.indexValueProviders = indexValueProviders;
+        }
+
+        public static async Task<DataStore<TId, T>> Build(
+            Func<IAsyncKeyValueStore<TId,T>> buildPersistence,
+            Func<string, Task<IAsyncKeyValueStore<FieldValue, HashSet<TId>>>> buildFieldIndexPersistence,
+            params Expression<Func<T, string>>[] indexedMembers)
+        {
+            var indexes = new IndexStore<TId>();
+            var indexedFields = indexedMembers.Select(m =>
+            {
+                var path = m.GetIndexName();
+                return (path, m.Compile());
+            }).ToArray();
+
+            foreach ((string name, Func<T, string> getter) in indexedFields)
+            {
+                indexes.Stores.TryAdd(name, await buildFieldIndexPersistence(name));
+            }
+
+            return new DataStore<TId, T>(buildPersistence(), indexes, indexedFields.ToDictionary(kv => kv.Item1, kv => kv.Item2));
+        }
+
+
+    }
 
 }
