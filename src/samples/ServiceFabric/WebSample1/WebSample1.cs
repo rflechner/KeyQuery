@@ -4,6 +4,7 @@ using System.Fabric;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using KeyQuery;
@@ -35,30 +36,54 @@ namespace WebSample1
             return new ServiceReplicaListener[]
             {
                 new ServiceReplicaListener(serviceContext =>
-                    new KestrelCommunicationListener(serviceContext, (url, listener) =>
+                    new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
                     {
                         ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
 
-                        DataStore<Guid, Customer> store = this.StateManager.AddDocumentStore<Guid, Customer>(new Expression<Func<Customer, string>>[]
-                        {
-                            model => model.FirstName,
-                            model => model.Birth.Year.ToString()
-                        }).Result;
+                        //DataStore<Guid, Customer> store = this.StateManager.AddDocumentStore<Guid, Customer>(new Expression<Func<Customer, string>>[]
+                        //{
+                        //    model => model.FirstName,
+                        //    model => model.Birth.Year.ToString()
+                        //}).Result;
 
                         return new WebHostBuilder()
                                     .UseKestrel()
                                     .ConfigureServices(
                                         services => services
                                             .AddSingleton<StatefulServiceContext>(serviceContext)
-                                            .AddSingleton(store)
+                                            .AddSingleton(x => this.StateManager.AddDocumentStore<Guid, Customer>(new Expression<Func<Customer, string>>[]
+                                            {
+                                                model => model.FirstName,
+                                                model => model.Birth.Year.ToString()
+                                            }).Result)
+                                            //.AddSingleton(store)
                                             .AddSingleton<IReliableStateManager>(this.StateManager))
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseStartup<Startup>()
-                                    .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
+                                    .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseReverseProxyIntegration)
                                     .UseUrls(url)
                                     .Build();
                     }))
             };
         }
     }
+
+    //public static class ContainerHelpers
+    //{
+    //    public static IServiceCollection AddSingletonLazy<TService>(this IServiceCollection services)
+    //        where TService : class
+    //    {
+    //        return services
+    //            .AddSingleton<TService>()
+    //            .AddSingleton(x => new Lazy<TService>(() => x.GetRequiredService<TService>()));
+    //    }
+
+    //    public static IServiceCollection AddSingletonLazy<TService>(this IServiceCollection services, Func<TService> f)
+    //        where TService : class
+    //    {
+    //        return services
+    //            .AddSingleton<TService>()
+    //            .AddSingleton(x => f);
+    //    }
+    //}
 }

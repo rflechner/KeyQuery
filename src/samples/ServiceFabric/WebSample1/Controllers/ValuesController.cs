@@ -27,7 +27,7 @@ namespace WebSample1.Controllers
         [HttpGet]
         public async Task<ICollection<Customer>> Get(CancellationToken cancellationToken)
         {
-            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customers");
+            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customer");
 
             var results = new List<Customer>();
 
@@ -46,17 +46,17 @@ namespace WebSample1.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<Customer> Get(Guid id)
+        public async Task<IActionResult> Get(Guid id)
         {
-            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customers");
+            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customer");
 
             using (var tx = stateManager.CreateTransaction())
             {
                 var result = await customers.TryGetValueAsync(tx, id);
                 if (result.HasValue)
-                    return result.Value;
-                return null;
-                //return StatusCode((int) HttpStatusCode.NotFound);
+                    return Json(result.Value);
+                
+                return StatusCode((int) HttpStatusCode.NotFound);
             }
         }
 
@@ -69,17 +69,6 @@ namespace WebSample1.Controllers
                 DateTime.Now.Millisecond, new DateTime(1985, 02, 11));
 
             await store.Insert(dto);
-
-            //var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customers");
-
-            //using (var tx = stateManager.CreateTransaction())
-            //{
-            //    var id = Guid.NewGuid();
-            //    var dto = new Customer(id, value, $"Lastname {DateTime.Now.Ticks}",
-            //        DateTime.Now.Millisecond, new DateTime(1985, 02, 11));
-            //    await customers.AddAsync(tx, id, dto);
-            //    await tx.CommitAsync();
-            //}
         }
 
         // PUT api/values/5
