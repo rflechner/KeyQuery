@@ -1,10 +1,13 @@
 using System;
+using System.Runtime.Serialization;
 
 namespace KeyQuery.Core
 {
+    [DataContract]
     public class FieldValue : IComparable<FieldValue>, IEquatable<FieldValue>
     {
-        public string Value { get; }
+        [DataMember]
+        public string Value { get; private set; }
 
         public FieldValue(string value)
         {

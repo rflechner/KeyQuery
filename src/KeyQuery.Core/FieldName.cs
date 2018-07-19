@@ -1,10 +1,14 @@
-﻿using System.Threading;
+﻿using System.Runtime.Serialization;
+using System.Threading;
 
 namespace KeyQuery.Core
 {
+    [DataContract]
     public class FieldName
     {
-        public string Value { get; }
+
+        [DataMember]
+        public string Value { get; private set; }
 
         public FieldName(string value)
         {

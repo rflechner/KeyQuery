@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -8,32 +9,32 @@ using Microsoft.ServiceFabric.Data.Collections;
 
 namespace KeyQuery.ServiceFabric
 {
-  public static class StoreBuilder
-  {
-    public static async Task<DataStore<TId, TModel>> AddDocumentStore<TId, TModel>(
-        this IReliableStateManager stateManager, Expression<Func<TModel, string>>[] indexedMembers, string name = null) 
-      where TId : IComparable<TId>, IEquatable<TId>
-      where TModel : IDto<TId> 
+    public static class StoreBuilder
     {
-      if (string.IsNullOrWhiteSpace(name))
-        name = typeof(TModel).Name;
+        public static async Task<DataStore<TId, TModel>> AddDocumentStore<TId, TModel>(
+            this IReliableStateManager stateManager, Expression<Func<TModel, string>>[] indexedMembers, string name = null)
+          where TId : IComparable<TId>, IEquatable<TId>
+          where TModel : IDto<TId>
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                name = typeof(TModel).Name;
 
-      var wrappedReliableDictionary = await stateManager.GetOrAddAsync<IReliableDictionary<TId, TModel>>(name);
-      Func<ITransaction> transactionBuilder = stateManager.CreateTransaction;
+            var wrappedReliableDictionary = await stateManager.GetOrAddAsync<IReliableDictionary<TId, TModel>>(name);
+            Func<ITransaction> transactionBuilder = stateManager.CreateTransaction;
 
-      async Task<IAsyncKeyValueStore<FieldValue, ImmutableHashSet<TId>>> BuildFieldIndexPersistence(string memberName)
-      {
-        var dictionary = await stateManager.GetOrAddAsync<IReliableDictionary<FieldValue, ImmutableHashSet<TId>>>($"{name}_{memberName}");
-        
-        return new ServiceFabAsyncKeyValueStore<FieldValue, ImmutableHashSet<TId>>(dictionary, transactionBuilder);
-      }
+            async Task<IAsyncKeyValueStore<FieldValue, HashSet<TId>>> BuildFieldIndexPersistence(string memberName)
+            {
+                var dictionary = await stateManager.GetOrAddAsync<IReliableDictionary<FieldValue, HashSet<TId>>>($"{name}_{memberName}");
 
-      var store = await DataStore<TId, TModel>.Build(
-        () => new ServiceFabAsyncKeyValueStore<TId, TModel>(wrappedReliableDictionary, transactionBuilder), 
-        BuildFieldIndexPersistence,
-        indexedMembers);
+                return new ServiceFabAsyncKeyValueStore<FieldValue, HashSet<TId>>(dictionary, transactionBuilder);
+            }
 
-      return store;
+            var store = await DataStore<TId, TModel>.Build(
+              () => new ServiceFabAsyncKeyValueStore<TId, TModel>(wrappedReliableDictionary, transactionBuilder),
+              BuildFieldIndexPersistence,
+              indexedMembers);
+
+            return store;
+        }
     }
-  }
 }

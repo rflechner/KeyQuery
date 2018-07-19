@@ -45,7 +45,7 @@ namespace KeyQuery.CSharpTests
         {
             var store = await DataStore<Guid, MyDto>.Build(
               () => new InMemoryKeyValueStore<Guid, MyDto>(),
-              async _ => new InMemoryKeyValueStore<FieldValue, ImmutableHashSet<Guid>>(),
+              async _ => new InMemoryKeyValueStore<FieldValue, HashSet<Guid>>(),
               new Expression<Func<MyDto, string>>[]
               {
                   dto => dto.FirstName,

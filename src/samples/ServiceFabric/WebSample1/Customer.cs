@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using KeyQuery;
+using KeyQuery.Core;
 
 namespace WebSample1
 {

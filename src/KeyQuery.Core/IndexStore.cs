@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace KeyQuery.Core
 {
@@ -7,9 +7,9 @@ namespace KeyQuery.Core
     {
         public IndexStore()
         {
-            Stores = new ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, ImmutableHashSet<TId>>>();
+            Stores = new ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, HashSet<TId>>>();
         }
 
-        public ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, ImmutableHashSet<TId>>> Stores { get; }
+        public ConcurrentDictionary<FieldName, IAsyncKeyValueStore<FieldValue, HashSet<TId>>> Stores { get; }
     }
 }

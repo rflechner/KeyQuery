@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -27,7 +26,7 @@ namespace KeyQuery.Core
 
         public static async Task<DataStore<TId, T>> Build(
             Func<IAsyncKeyValueStore<TId, T>> buildPersistence,
-            Func<string, Task<IAsyncKeyValueStore<FieldValue, ImmutableHashSet<TId>>>> buildFieldIndexPersistence,
+            Func<string, Task<IAsyncKeyValueStore<FieldValue, HashSet<TId>>>> buildFieldIndexPersistence,
             params Expression<Func<T, string>>[] indexedMembers)
         {
             var indexes = new IndexStore<TId>();
@@ -42,7 +41,7 @@ namespace KeyQuery.Core
                 indexes.Stores.TryAdd(name, await buildFieldIndexPersistence(name));
             }
 
-            return new DataStore<TId, T>(buildPersistence(), indexes, Enumerable.ToDictionary(indexedFields, kv => kv.Item1, kv => kv.Item2));
+            return new DataStore<TId, T>(buildPersistence(), indexes, indexedFields.ToDictionary(kv => kv.Item1, kv => kv.Item2));
         }
 
         public async Task<bool> Insert(T record)
@@ -63,17 +62,18 @@ namespace KeyQuery.Core
         {
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
-            var currentIds = await index.GetOrAdd(fieldValue, _ => ImmutableHashSet<TId>.Empty);
-            var ids = currentIds.Add(id);
-            await index.AddOrUpdate(fieldValue, ids, (_, set) => ids);
+            var currentIds = await index.GetOrAdd(fieldValue, _ => new HashSet<TId>());
+            var newIds = new HashSet<TId>(currentIds);
+            newIds.Add(id);
+            await index.AddOrUpdate(fieldValue, newIds, (_, __) => newIds);
         }
 
         public async Task<ICollection<T>> SearchByIndex(FieldName name, object value)
         {
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
-            var ids = await index.GetOrAdd(fieldValue, _ => ImmutableHashSet<TId>.Empty);
-            return await Task.WhenAll(Enumerable.Select(ids, id => records.Get(id))
+            var ids = await index.GetOrAdd(fieldValue, _ => new HashSet<TId>());
+            return await Task.WhenAll(ids.Select(id => records.Get(id))
                 .ToArray());
         }
 
@@ -81,9 +81,10 @@ namespace KeyQuery.Core
         {
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
-            var currentIds = await index.GetOrAdd(fieldValue, _ => ImmutableHashSet<TId>.Empty);
-            var ids = currentIds.Remove(id);
-            await index.AddOrUpdate(fieldValue, ids, (_, set) => ids);
+            var currentIds = await index.GetOrAdd(fieldValue, _ => new HashSet<TId>());
+            var newIds = new HashSet<TId>(currentIds);
+            newIds.Remove(id);
+            await index.AddOrUpdate(fieldValue, newIds, (_, __) => newIds);
         }
 
         public async Task<bool> Remove(TId id)

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -35,7 +35,7 @@ namespace KeyQuery.CSharpTests
       
       var store = await DataStore<Guid, MyDto>.Build(
         () => new ServiceFabAsyncKeyValueStore<Guid, MyDto>(wrappedReliableDictionary, transactionBuilder),
-        async _ => new ServiceFabAsyncKeyValueStore<FieldValue, ImmutableHashSet<Guid>>(new MockReliableDictionary<FieldValue, ImmutableHashSet<Guid>>(new Uri("fabric://popo")), transactionBuilder),
+        async _ => new ServiceFabAsyncKeyValueStore<FieldValue, HashSet<Guid>>(new MockReliableDictionary<FieldValue, HashSet<Guid>>(new Uri("fabric://popo")), transactionBuilder),
         new Expression<Func<MyDto, string>>[]
         {
           dto => dto.FirstName,
