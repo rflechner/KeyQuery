@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -11,7 +12,7 @@ namespace KeyQuery.Core
         protected override Expression VisitMember(MemberExpression node)
         {
             if (node.Member is PropertyInfo prop)
-                names.Add(prop.Name);
+                names.Insert(0, prop.Name);
             return base.VisitMember(node);
         }
 
