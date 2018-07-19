@@ -21,6 +21,10 @@ namespace KeyQuery.Core
             this.indexValueProviders = indexValueProviders;
         }
 
+        public IAsyncKeyValueStore<TId, T> Records => records;
+
+        public IndexStore<TId> Indexes => indexes;
+
         public static async Task<DataStore<TId, T>> Build(
             Func<IAsyncKeyValueStore<TId, T>> buildPersistence,
             Func<string, Task<IAsyncKeyValueStore<FieldValue, ImmutableHashSet<TId>>>> buildFieldIndexPersistence,
