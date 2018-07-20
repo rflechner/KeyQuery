@@ -44,40 +44,60 @@ namespace KeyQuery.Core.Linq
 
     protected override Expression VisitBinary(BinaryExpression node)
     {
-      if (node.NodeType == ExpressionType.Equal)
-        return VisitComparison(node);
-      
-      if (node.NodeType == ExpressionType.AndAlso){}
-        return VisitAnd(node);
-      
+      if (Convert(node, out var operation))
+      {
+        Operation = operation;
+        return node;
+      }
+
       return base.VisitBinary(node);
     }
 
-    private Expression VisitAnd(BinaryExpression node)
+    static bool Convert(BinaryExpression node, out Operation operation)
     {
-      // operator &
-      var left = new QueryVisitor();
-      left.Visit(node.Left);
-      var right = new QueryVisitor();
-      right.Visit(node.Right);
-      
-      Operation = new And(left.Operation, right.Operation);
+      switch (node.NodeType)
+      {
+        case ExpressionType.Equal:
+          operation = VisitComparison(node);
+          return true;
+        case ExpressionType.AndAlso:
+          operation = VisitAnd(node);
+          return true;
+        case ExpressionType.OrElse:
+          operation = VisitOr(node);
+          return true;
+      }
 
-      return node;
+      operation = null;
+
+      return false;
     }
 
-    private Expression VisitComparison(BinaryExpression node)
+    private static Operation VisitBinaryOperation(BinaryExpression node, Func<Operation, Operation, Operation> builder)
+    {
+      if (!(node.Left is BinaryExpression leftExpression) || !Convert(leftExpression, out var left))
+        throw new NotSupportedException();
+      
+      if (!(node.Right is BinaryExpression rightExpression) || !Convert(rightExpression, out var right))
+        throw new NotSupportedException();
+
+      return builder(left, right);
+    }
+    
+    private static Operation VisitAnd(BinaryExpression node) => VisitBinaryOperation(node, (left, right) => new And(left, right));
+
+    private static Operation VisitOr(BinaryExpression node) => VisitBinaryOperation(node, (left, right) => new Or(left, right));
+
+    private static Operation VisitComparison(BinaryExpression node)
     {
       var path1 = GetPath(node.Left);
       var exp = node.Right;
       
       var value = GetValue(exp);
-      Operation = new QueryByField(path1, value);
-      
-      return node;
+      return new QueryByField(path1, value);
     }
 
-    private object GetValue(Expression exp)
+    private static object GetValue(Expression exp)
     {
       switch (exp)
       {
@@ -95,7 +115,7 @@ namespace KeyQuery.Core.Linq
       throw new NotImplementedException(exp.ToString());
     }
 
-    string GetPath(Expression expression)
+    static string GetPath(Expression expression)
     {
       var propertyVisitor = new PropertyVisitor();
       propertyVisitor.Visit(expression);
@@ -105,7 +125,7 @@ namespace KeyQuery.Core.Linq
 
   public class ComparisonVisitor : ExpressionVisitor
   {
-    List<string> paths = new List<string>();
+    private readonly List<string> paths = new List<string>();
     
     protected override Expression VisitMember(MemberExpression node)
     {
