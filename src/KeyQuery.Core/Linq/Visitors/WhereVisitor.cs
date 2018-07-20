@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using KeyQuery.Core.Querying;
 
-namespace KeyQuery.Core.Linq
+namespace KeyQuery.Core.Linq.Visitors
 {
   public class WhereVisitor : ExpressionVisitor
   {

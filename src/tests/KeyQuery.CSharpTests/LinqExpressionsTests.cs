@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KeyQuery.Core;
 using KeyQuery.Core.Linq;
+using KeyQuery.Core.Linq.Visitors;
 using KeyQuery.Core.Querying;
 using NFluent;
 using Xunit;

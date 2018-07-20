@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using KeyQuery.Core.Querying;
 
-namespace KeyQuery.Core.Linq
+namespace KeyQuery.Core.Linq.Visitors
 {
   public class QueryVisitor : ExpressionVisitor
   {

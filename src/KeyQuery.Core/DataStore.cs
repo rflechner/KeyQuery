@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using KeyQuery.Core.Linq.Visitors;
 
 namespace KeyQuery.Core
 {
@@ -100,6 +101,20 @@ namespace KeyQuery.Core
             }
 
             return true;
+        }
+
+        public Task<ICollection<T>> Execute(Func<IQueryable<T>, IQueryable<T>> query)
+        {
+            var queryable = Enumerable.Empty<T>().AsQueryable();
+            return Execute(query(queryable));
+        }
+        
+        public async Task<ICollection<T>> Execute(IQueryable<T> query)
+        {
+            var expression = query.Expression;
+            var visitor = new QueryVisitor();
+            visitor.Visit(expression);
+            return await visitor.Operation.Execute(this);
         }
     }
 }
