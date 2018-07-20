@@ -21,12 +21,11 @@ namespace KeyQuery.CSharpTests
       var visitor = new QueryVisitor();
       visitor.Visit(queryable.Expression);
 
-      Check.That(visitor.Operation).IsInstanceOf<QueryByField>();
+      Check.That(visitor.Operation).IsInstanceOf<QueryById>();
 
-      var queryByField = (QueryByField) visitor.Operation;
+      var queryById = (QueryById) visitor.Operation;
 
-      Check.That(queryByField.Name.Value).IsEqualTo("Id");
-      Check.That(queryByField.FieldValue).IsEqualTo(Guid.Empty);
+      Check.That(queryById.Id).IsEqualTo(Guid.Empty);
     }
     
     [Fact]
@@ -40,15 +39,13 @@ namespace KeyQuery.CSharpTests
       Check.That(visitor.Operation).IsInstanceOf<And>();
 
       var and = (And) visitor.Operation;
-      var first = (QueryByField) and.First;
+      var first = (QueryById) and.First;
       var second = (QueryByField) and.Second;
 
-      Check.That(first.Name.Value).IsEqualTo("Id");
-      Check.That(first.FieldValue).IsEqualTo(Guid.Empty);
+      Check.That(first.Id).IsEqualTo(Guid.Empty);
       
       Check.That(second.Name.Value).IsEqualTo("FirstName");
       Check.That(second.FieldValue).IsEqualTo("lalala");
-      
     }
     
     [Fact]
@@ -62,11 +59,10 @@ namespace KeyQuery.CSharpTests
       Check.That(visitor.Operation).IsInstanceOf<Or>();
       
       var or = (Or) visitor.Operation;
-      var first = (QueryByField) or.First;
+      var first = (QueryById) or.First;
       var second = (QueryByField) or.Second;
 
-      Check.That(first.Name.Value).IsEqualTo("Id");
-      Check.That(first.FieldValue).IsEqualTo(Guid.Empty);
+      Check.That(first.Id).IsEqualTo(Guid.Empty);
       
       Check.That(second.Name.Value).IsEqualTo("FirstName");
       Check.That(second.FieldValue).IsEqualTo("lalala");
@@ -84,13 +80,12 @@ namespace KeyQuery.CSharpTests
       
       var or = (Or) visitor.Operation;
       var and = (And) or.First;
-      var first = (QueryByField) and.First;
+      var first = (QueryById) and.First;
       var second = (QueryByField) and.Second;
 
       var third = (QueryByField) or.Second;
 
-      Check.That(first.Name.Value).IsEqualTo("Id");
-      Check.That(first.FieldValue).IsEqualTo(Guid.Empty);
+      Check.That(first.Id).IsEqualTo(Guid.Empty);
       
       Check.That(second.Name.Value).IsEqualTo("Score");
       Check.That(second.FieldValue).IsEqualTo(10);
