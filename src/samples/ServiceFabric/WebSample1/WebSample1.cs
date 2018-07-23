@@ -10,6 +10,7 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
+using WebSample1.Repositories;
 
 namespace WebSample1
 {
@@ -45,6 +46,7 @@ namespace WebSample1
                                                 model => model.FirstName,
                                                 model => model.Birth.Year.ToString()
                                             }).Result)
+                                            .AddScoped<ICustomerRepository, CustomerRepository>()
                                             .AddSingleton<IReliableStateManager>(this.StateManager))
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseStartup<Startup>()

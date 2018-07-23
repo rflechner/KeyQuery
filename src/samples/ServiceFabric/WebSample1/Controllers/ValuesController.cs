@@ -9,56 +9,35 @@ using KeyQuery.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
+using WebSample1.Repositories;
 
 namespace WebSample1.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        private readonly IReliableStateManager stateManager;
-        private readonly DataStore<Guid, Customer> store;
+        private readonly ICustomerRepository customerRepository;
 
-        public ValuesController(IReliableStateManager stateManager, DataStore<Guid, Customer> store)
+        public ValuesController(ICustomerRepository customerRepository)
         {
-            this.stateManager = stateManager;
-            this.store = store;
+            this.customerRepository = customerRepository;
         }
 
         // GET api/values
         [HttpGet]
-        public async Task<ICollection<Customer>> Get(CancellationToken cancellationToken)
+        public Task<ICollection<Customer>> Get(CancellationToken cancellationToken)
         {
-            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customer");
-
-            var results = new List<Customer>();
-
-            using (var tx = stateManager.CreateTransaction())
-            {
-                var enumerable = await customers.CreateEnumerableAsync(tx);
-                var enumerator = enumerable.GetAsyncEnumerator();
-                while (await enumerator.MoveNextAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
-                {
-                    results.Add(enumerator.Current.Value);
-                }
-            }
-
-            return results;
+            return customerRepository.GetAllCustomers(cancellationToken);
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            var customers = await stateManager.GetOrAddAsync<IReliableDictionary<Guid, Customer>>("Customer");
-
-            using (var tx = stateManager.CreateTransaction())
-            {
-                var result = await customers.TryGetValueAsync(tx, id);
-                if (result.HasValue)
-                    return Json(result.Value);
-                
+            var customer = await customerRepository.Get(id);
+            if (customer == null)
                 return StatusCode((int) HttpStatusCode.NotFound);
-            }
+            return Json(customer);
         }
 
         // POST api/values
@@ -69,7 +48,7 @@ namespace WebSample1.Controllers
             var dto = new Customer(id, value, $"Lastname {DateTime.Now.Ticks}",
                 DateTime.Now.Millisecond, new DateTime(1985, 02, 11));
 
-            await store.Insert(dto);
+            await customerRepository.Insert(dto);
         }
 
         // PUT api/values/5
