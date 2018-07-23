@@ -1,56 +1,46 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using KeyQuery.Core;
 using KeyQuery.Core.Querying;
+using KeyQuery.ServiceFabric;
+using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
 using NFluent;
+using ServiceFabric.Mocks;
+using ServiceFabric.Mocks.ReliableCollections;
 using Xunit;
 
 namespace KeyQuery.CSharpTests
 {
-    public class IndexExpressionsTests
+    public class ServiceFabricStorageTests
     {
-
         [Fact]
-        public void ExpressionMember_should_give_index_path()
+        public async Task Storing_value()
         {
-            Check.That(ExpressionHelpers.GetIndexName<MyDto, string>(r => r.FirstName)).Equals("FirstName");
-            Check.That(ExpressionHelpers.GetIndexName<MyDto, int>(r => r.Birth.Day)).Equals("Birth.Day");
-            Check.That(ExpressionHelpers.GetIndexName<MyDto, string>(r => r.Birth.Day.ToString())).Equals("Birth.Day");
-        }
+            var dictionary = new MockReliableDictionary<Guid, MyDto>(new Uri("fabric://popo"));
 
-        [Fact]
-        public void ExpressionMember_should_give_index_value()
-        {
             var dto = new MyDto(Guid.NewGuid(), "toto", "jean", 32, new DateTime(1985, 02, 11));
-            Expression<Func<MyDto, string>> expression1 = v => v.FirstName;
-            Expression<Func<MyDto, string>> expression2 = v => v.Birth.ToString();
-            Expression expression3 = expression2;
-
-            var f1 = expression1.Compile();
-            var f2 = expression2.Compile();
-            var value1 = f1(dto);
-            var value2 = f2(dto);
-
-            Check.That(value1).Equals("toto");
-            Check.That(value2).IsEqualTo(new DateTime(1985, 02, 11).ToString());
+            var tx = new MockTransaction(null, 1);
+            await dictionary.AddAsync(tx, dto.Id, dto);
         }
 
         [Fact]
         public async Task InsertRecord_should_index_members()
         {
+            IReliableDictionary<Guid, MyDto> wrappedReliableDictionary = new MockReliableDictionary<Guid, MyDto>(new Uri("fabric://popo"));
+            Func<ITransaction> transactionBuilder = () => new MockTransaction(null, 1);
+
             var store = await DataStore<Guid, MyDto>.Build(
-              () => new InMemoryKeyValueStore<Guid, MyDto>(),
-              async _ => new InMemoryKeyValueStore<FieldValue, HashSet<Guid>>(),
+              () => new ServiceFabAsyncKeyValueStore<Guid, MyDto>(wrappedReliableDictionary, transactionBuilder),
+              async _ => new ServiceFabAsyncKeyValueStore<FieldValue, HashSet<Guid>>(new MockReliableDictionary<FieldValue, HashSet<Guid>>(new Uri("fabric://popo")), transactionBuilder),
               new Expression<Func<MyDto, string>>[]
               {
-                  dto => dto.FirstName,
-                  dto => dto.Lastname,
-                  dto => dto.Birth.Day.ToString()
+          dto => dto.FirstName,
+          dto => dto.Lastname,
+          dto => dto.Birth.Day.ToString()
               });
 
             for (var i = 0; i < 10; i++)
@@ -70,7 +60,7 @@ namespace KeyQuery.CSharpTests
             Check.That(resultsById.Single().Score).IsEqualTo(expectedById.Score);
 
             var expectedByAndoperation =
-              (await 
+              (await
                   new And(
                     new QueryByField("FirstName", "firstname 5"),
                     new QueryByField("Lastname", "lastname 5")).Execute(store)).ToList();
@@ -79,7 +69,7 @@ namespace KeyQuery.CSharpTests
             Check.That(expectedByAndoperation.Single().FirstName).IsEqualTo("firstname 5");
 
             var expectedByOroperation =
-              (await 
+              (await
                 new Or(
                   new QueryByField("FirstName", "firstname 5"),
                   new QueryByField("Lastname", "lastname 4")).Execute(store))
@@ -91,7 +81,7 @@ namespace KeyQuery.CSharpTests
             Check.That(expectedByOroperation[1].FirstName).IsEqualTo("firstname 5");
 
             var expectedByOroperation2 =
-              (await 
+              (await
                   new Or(
                       new QueryByField("FirstName", "firstname 5"),
                       new Or(
@@ -105,6 +95,10 @@ namespace KeyQuery.CSharpTests
             Check.That(expectedByOroperation2[0].FirstName).IsEqualTo("firstname 2");
             Check.That(expectedByOroperation2[1].FirstName).IsEqualTo("firstname 4");
             Check.That(expectedByOroperation2[2].FirstName).IsEqualTo("firstname 5");
+
+            var myDtos = await store.Execute(q => q.Where(m => m.Lastname == "lastname 4" || m.FirstName == "firstname 2"));
+
+            Check.That(myDtos).CountIs(2);
         }
 
     }

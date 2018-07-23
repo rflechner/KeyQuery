@@ -1,11 +1,25 @@
+﻿using System;
+using System.Runtime.Serialization;
+using KeyQuery;
 using KeyQuery.Core;
-using System;
 
-namespace KeyQuery.CSharpTests
+namespace WebSample1
 {
-    class MyDto : IDto<Guid>, IEquatable<MyDto>
+    [DataContract]
+    public class Customer : IDto<Guid>, IEquatable<Customer>
     {
-        public MyDto(Guid id, string firstName, string lastname, int score, DateTime birth)
+        [DataMember] public Guid Id { get; private set; }
+        [DataMember] public string FirstName { get; private set; }
+        [DataMember] public string Lastname { get; private set; }
+        [DataMember] public int Score { get; private set; }
+        [DataMember] public DateTime Birth { get; private set; }
+
+        private Customer()
+        {
+            
+        }
+        
+        public Customer(Guid id, string firstName, string lastname, int score, DateTime birth)
         {
             Id = id;
             FirstName = firstName;
@@ -14,13 +28,7 @@ namespace KeyQuery.CSharpTests
             Birth = birth;
         }
 
-        public Guid Id { get; }
-        public string FirstName { get; }
-        public string Lastname { get; }
-        public int Score { get; }
-        public DateTime Birth { get; }
-
-        public bool Equals(MyDto other)
+        public bool Equals(Customer other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -32,7 +40,7 @@ namespace KeyQuery.CSharpTests
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((MyDto)obj);
+            return Equals((Customer) obj);
         }
 
         public override int GetHashCode()
