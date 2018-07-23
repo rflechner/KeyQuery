@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using KeyQuery.Core;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
@@ -18,64 +19,74 @@ namespace KeyQuery.ServiceFabric
             this.wrappedReliableDictionary = wrappedReliableDictionary;
             this.transactionBuilder = transactionBuilder;
         }
+
+        private bool IsTransactionnel => Transaction.Current != null;
+
+        private async Task<T> Do<T>(Func<ITransaction, Task<T>> it)
+        {
+            var tx = transactionBuilder();
+            
+            try
+            {
+                var v = await it(tx);
+
+                if (IsTransactionnel)
+                    Transaction.Current.TransactionCompleted += async (sender, args) =>
+                    {
+                        if (tx != null)
+                        {
+                            await tx.CommitAsync();
+                            tx.Dispose();
+                        }
+                    };
+                else
+                    await tx.CommitAsync();
+
+                return v;
+            }
+            finally
+            {
+                if (!IsTransactionnel)
+                    tx.Dispose();
+            }
+        }
         
-        public async Task<TValue> AddOrUpdate(TKey key, TValue value, Func<TKey, TValue, TValue> updateWith)
+        public Task<TValue> AddOrUpdate(TKey key, TValue value, Func<TKey, TValue, TValue> updateWith)
         {
-            using (var tx = transactionBuilder())
-            {
-                var v = await wrappedReliableDictionary.AddOrUpdateAsync(tx, key, value, updateWith);
-                await tx.CommitAsync();
-
-                return v;
-            }
+            return Do(async tx => await wrappedReliableDictionary.AddOrUpdateAsync(tx, key, value, updateWith));
         }
 
-        public async Task<TValue> GetOrAdd(TKey key, Func<TKey, TValue> addValueFactory)
+        public Task<TValue> GetOrAdd(TKey key, Func<TKey, TValue> addValueFactory)
         {
-            using (var tx = transactionBuilder())
-            {
-                var v = await wrappedReliableDictionary.GetOrAddAsync(tx, key, key1 => addValueFactory.Invoke(key));
-                await tx.CommitAsync();
-
-                return v;
-            }
+            return Do(async tx => await wrappedReliableDictionary.GetOrAddAsync(tx, key, key1 => addValueFactory.Invoke(key)));
         }
 
-        public async Task<bool> TryAdd(TKey key, TValue value)
+        public Task<bool> TryAdd(TKey key, TValue value)
         {
-            using (var tx = transactionBuilder())
-            {
-                var v = await wrappedReliableDictionary.TryAddAsync(tx, key, value);
-                await tx.CommitAsync();
-
-                return v;
-            }
+            return Do(async tx => await wrappedReliableDictionary.TryAddAsync(tx, key, value));
         }
 
-        public async Task<(bool success, TValue value)> TryRemove(TKey key)
+        public Task<(bool success, TValue value)> TryRemove(TKey key)
         {
-            using (var tx = transactionBuilder())
+            return Do(async tx =>
             {
                 var v = await wrappedReliableDictionary.TryRemoveAsync(tx, key);
-                await tx.CommitAsync();
-
                 return v.HasValue ? (true, v.Value) : (false, default(TValue));
-            }
+            });
         }
 
-        public async Task<TValue> Get(TKey key)
+        public Task<TValue> Get(TKey key)
         {
-            using (var tx = transactionBuilder())
+            return Do(async tx =>
             {
                 var conditionalValue = await wrappedReliableDictionary.TryGetValueAsync(tx, key);
-
                 return conditionalValue.HasValue ? conditionalValue.Value : default(TValue);
-            }
+            });
         }
 
         public async Task<ICollection<TKey>> AllKeys()
         {
-            using (var tx = transactionBuilder())
+            return await Do(async tx =>
             {
                 var e = await wrappedReliableDictionary.CreateEnumerableAsync(tx);
                 var enumerator = e.GetAsyncEnumerator();
@@ -88,12 +99,12 @@ namespace KeyQuery.ServiceFabric
                 }
 
                 return results.AsReadOnly();
-            }
+            });
         }
 
         public async Task<ICollection<TValue>> AllValues()
         {
-            using (var tx = transactionBuilder())
+            return await Do(async tx =>
             {
                 var e = await wrappedReliableDictionary.CreateEnumerableAsync(tx);
                 var enumerator = e.GetAsyncEnumerator();
@@ -106,7 +117,7 @@ namespace KeyQuery.ServiceFabric
                 }
 
                 return results.AsReadOnly();
-            }
+            });
         }
     }
 }

@@ -64,8 +64,7 @@ namespace KeyQuery.Core
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
             var currentIds = await index.GetOrAdd(fieldValue, _ => new HashSet<TId>());
-            var newIds = new HashSet<TId>(currentIds);
-            newIds.Add(id);
+            var newIds = new HashSet<TId>(currentIds) {id};
             await index.AddOrUpdate(fieldValue, newIds, (_, __) => newIds);
         }
 
