@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using System.Fabric;
 using System.IO;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using KeyQuery;
 using KeyQuery.ServiceFabric;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,12 +35,6 @@ namespace WebSample1
                     {
                         ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
 
-                        //DataStore<Guid, Customer> store = this.StateManager.AddDocumentStore<Guid, Customer>(new Expression<Func<Customer, string>>[]
-                        //{
-                        //    model => model.FirstName,
-                        //    model => model.Birth.Year.ToString()
-                        //}).Result;
-
                         return new WebHostBuilder()
                                     .UseKestrel()
                                     .ConfigureServices(
@@ -56,7 +45,6 @@ namespace WebSample1
                                                 model => model.FirstName,
                                                 model => model.Birth.Year.ToString()
                                             }).Result)
-                                            //.AddSingleton(store)
                                             .AddSingleton<IReliableStateManager>(this.StateManager))
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseStartup<Startup>()
@@ -67,23 +55,4 @@ namespace WebSample1
             };
         }
     }
-
-    //public static class ContainerHelpers
-    //{
-    //    public static IServiceCollection AddSingletonLazy<TService>(this IServiceCollection services)
-    //        where TService : class
-    //    {
-    //        return services
-    //            .AddSingleton<TService>()
-    //            .AddSingleton(x => new Lazy<TService>(() => x.GetRequiredService<TService>()));
-    //    }
-
-    //    public static IServiceCollection AddSingletonLazy<TService>(this IServiceCollection services, Func<TService> f)
-    //        where TService : class
-    //    {
-    //        return services
-    //            .AddSingleton<TService>()
-    //            .AddSingleton(x => f);
-    //    }
-    //}
 }
