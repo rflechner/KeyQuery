@@ -35,7 +35,8 @@ namespace KeyQuery.ServiceFabric
                     {
                         if (tx != null)
                         {
-                            await tx.CommitAsync();
+                            if (args.Transaction.TransactionInformation.Status == TransactionStatus.Committed)
+                                await tx.CommitAsync();
                             tx.Dispose();
                         }
                     };

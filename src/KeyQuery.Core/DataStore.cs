@@ -56,7 +56,7 @@ namespace KeyQuery.Core
                 await Index(record.Id, index.Key, value);
             }
 
-            return false;
+            return true;
         }
 
         public async Task Index(TId id, FieldName name, object value)
