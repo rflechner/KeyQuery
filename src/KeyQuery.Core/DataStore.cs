@@ -102,13 +102,18 @@ namespace KeyQuery.Core
             return true;
         }
 
-        public Task<ICollection<T>> Execute(Func<IQueryable<T>, IQueryable<T>> query)
+        public async Task<T> FindOne(Func<IQueryable<T>, IQueryable<T>> query)
         {
-            var queryable = Enumerable.Empty<T>().AsQueryable();
-            return Execute(query(queryable));
+            return (await Find(query)).SingleOrDefault();
         }
         
-        public async Task<ICollection<T>> Execute(IQueryable<T> query)
+        public Task<ICollection<T>> Find(Func<IQueryable<T>, IQueryable<T>> query)
+        {
+            var queryable = Enumerable.Empty<T>().AsQueryable();
+            return Find(query(queryable));
+        }
+        
+        public async Task<ICollection<T>> Find(IQueryable<T> query)
         {
             var expression = query.Expression;
             var visitor = new QueryVisitor();

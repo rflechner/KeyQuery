@@ -96,7 +96,7 @@ namespace KeyQuery.CSharpTests
             Check.That(expectedByOroperation2[1].FirstName).IsEqualTo("firstname 4");
             Check.That(expectedByOroperation2[2].FirstName).IsEqualTo("firstname 5");
 
-            var myDtos = await store.Execute(q => q.Where(m => m.Lastname == "lastname 4" || m.FirstName == "firstname 2"));
+            var myDtos = await store.Find(q => q.Where(m => m.Lastname == "lastname 4" || m.FirstName == "firstname 2"));
 
             Check.That(myDtos).CountIs(2);
         }

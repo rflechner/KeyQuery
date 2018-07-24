@@ -29,7 +29,7 @@ namespace WebSample1.Repositories
 
     public async Task<Customer> Get(Guid id)
     {
-      return (await store.Execute(x => x.Where(c => c.Id == id))).SingleOrDefault();
+      return await store.FindOne(x => x.Where(c => c.Id == id));
     }
 
     public Task<bool> Insert(Customer customer)
