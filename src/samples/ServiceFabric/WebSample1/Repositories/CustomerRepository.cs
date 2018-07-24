@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using KeyQuery.Core;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
 
@@ -27,11 +28,11 @@ namespace WebSample1.Repositories
 
         public async Task<bool> Insert(Customer customer)
         {
-            using (var tx = new TransactionScope())
+            using (var tx = store.CreateTransaction())
             {
-                var r = await store.Insert(customer);
+                var r = await store.Insert(tx, customer);
 
-                tx.Complete();
+                await tx.CommitAsync();
 
                 return r;
             }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using KeyQuery.Core;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
+using ITransaction = Microsoft.ServiceFabric.Data.ITransaction;
 
 namespace KeyQuery.ServiceFabric
 {

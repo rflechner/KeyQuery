@@ -45,58 +45,60 @@ namespace KeyQuery.Core
             return new DataStore<TId, T>(buildPersistence(), indexes, indexedFields.ToDictionary(kv => kv.Item1, kv => kv.Item2));
         }
 
-        public async Task<bool> Insert(T record)
+        public async Task<bool> Insert(ITransaction tx, T record)
         {
-            if (!await records.TryAdd(record.Id, record))
+            if (!await records.TryAdd(tx, record.Id, record))
                 return false;
 
             foreach (var index in indexValueProviders)
             {
                 var value = index.Value(record);
-                await Index(record.Id, index.Key, value);
+                await Index(tx, record.Id, index.Key, value);
             }
 
             return true;
         }
 
-        public async Task Index(TId id, FieldName name, object value)
+        public async Task Index(ITransaction tx, TId id, FieldName name, object value)
         {
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
-            var currentIds = await index.GetOrAdd(fieldValue, _ => new HashSet<TId>());
+            var currentIds = await index.GetOrAdd(tx, fieldValue, _ => new HashSet<TId>());
             var newIds = new HashSet<TId>(currentIds) {id};
-            await index.AddOrUpdate(fieldValue, newIds, (_, __) => newIds);
+            await index.AddOrUpdate(tx, fieldValue, newIds, (_, __) => newIds);
         }
 
         public async Task<ICollection<T>> SearchByIndex(FieldName name, object value)
         {
-            var index = indexes.Stores[name];
-            var fieldValue = value?.ToString();
-            var ids = await index.GetOrAdd(fieldValue, _ => new HashSet<TId>());
-            return await Task.WhenAll(ids.Select(id => records.Get(id))
-                .ToArray());
+            using (var tx = records.CreateTransaction())
+            {
+                var index = indexes.Stores[name];
+                var fieldValue = value?.ToString();
+                var ids = await index.GetOrAdd(tx, fieldValue, _ => new HashSet<TId>());
+                return await Task.WhenAll(ids.Select(id => records.Get(tx, id)).ToArray());
+            }
         }
 
-        public async Task RemoveIndexedValue(TId id, FieldName name, object value)
+        public async Task RemoveIndexedValue(ITransaction tx, TId id, FieldName name, object value)
         {
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
-            var currentIds = await index.GetOrAdd(fieldValue, _ => new HashSet<TId>());
+            var currentIds = await index.GetOrAdd(tx, fieldValue, _ => new HashSet<TId>());
             var newIds = new HashSet<TId>(currentIds);
             newIds.Remove(id);
-            await index.AddOrUpdate(fieldValue, newIds, (_, __) => newIds);
+            await index.AddOrUpdate(tx, fieldValue, newIds, (_, __) => newIds);
         }
 
-        public async Task<bool> Remove(TId id)
+        public async Task<bool> Remove(ITransaction tx, TId id)
         {
-            (bool success, T record) = await records.TryRemove(id);
+            (bool success, T record) = await records.TryRemove(tx, id);
             if (!success)
                 return false;
 
             foreach (var kv in indexValueProviders)
             {
                 var value = kv.Value(record);
-                await RemoveIndexedValue(record.Id, kv.Key, value);
+                await RemoveIndexedValue(tx, record.Id, kv.Key, value);
             }
 
             return true;
@@ -119,6 +121,11 @@ namespace KeyQuery.Core
             var visitor = new QueryVisitor();
             visitor.Visit(expression);
             return await visitor.Operation.Execute(this);
+        }
+
+        public ITransaction CreateTransaction()
+        {
+            return records.CreateTransaction();
         }
     }
 }

@@ -53,11 +53,16 @@ namespace KeyQuery.CSharpTests
                   dto => dto.Birth.Day.ToString()
               });
 
-            for (var i = 0; i < 10; i++)
+            using (var tx = store.CreateTransaction())
             {
-                var d = 1000 + i * 200;
-                var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i, new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
-                await store.Insert(dto);
+                for (var i = 0; i < 10; i++)
+                {
+                    var d = 1000 + i * 200;
+                    var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i,
+                        new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
+
+                    await store.Insert(tx, dto);
+                }
             }
 
             var someId = (await store.Records.AllKeys()).First();

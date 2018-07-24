@@ -11,6 +11,7 @@ using NFluent;
 using ServiceFabric.Mocks;
 using ServiceFabric.Mocks.ReliableCollections;
 using Xunit;
+using ITransaction = Microsoft.ServiceFabric.Data.ITransaction;
 
 namespace KeyQuery.CSharpTests
 {
@@ -29,15 +30,15 @@ namespace KeyQuery.CSharpTests
                 dto => dto.Lastname, 
                 dto => dto.Birth.Day.ToString()
             );
-
-            using (var scope = new TransactionScope())
+            
+            using (var tx = store.CreateTransaction())
             {
                 for (var i = 0; i < 1; i++)
                 {
                     var d = 1000 + i * 200;
                     var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i,
                         new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
-                    await store.Insert(dto);
+                    await store.Insert(tx, dto);
                 }
             }
             
@@ -59,18 +60,18 @@ namespace KeyQuery.CSharpTests
             );
 
             var count = 100;
-
-            using (var scope = new TransactionScope())
+            
+            using (var tx = store.CreateTransaction())
             {
                 for (var i = 0; i < count; i++)
                 {
                     var d = 1000 + i * 200;
                     var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i,
                         new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
-                    await store.Insert(dto);
+                    await store.Insert(tx, dto);
                 }
                
-                scope.Complete();
+                await tx.CommitAsync();
             }
             
             Check.That(wrappedReliableDictionary.Count).IsEqualTo(count);
