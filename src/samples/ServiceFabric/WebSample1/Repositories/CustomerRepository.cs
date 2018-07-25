@@ -49,5 +49,10 @@ namespace WebSample1.Repositories
 
             return results;
         }
+
+        public Task<ICollection<Customer>> SearchByFirstname(string firstname)
+        {
+            return store.Find(x => x.Where(c => c.FirstName == firstname));
+        }
     }
 }
