@@ -12,6 +12,7 @@ using NFluent;
 using ServiceFabric.Mocks;
 using ServiceFabric.Mocks.ReliableCollections;
 using Xunit;
+using ITransaction = Microsoft.ServiceFabric.Data.ITransaction;
 
 namespace KeyQuery.CSharpTests
 {
@@ -38,15 +39,16 @@ namespace KeyQuery.CSharpTests
               async _ => new ServiceFabAsyncKeyValueStore<FieldValue, HashSet<Guid>>(new MockReliableDictionary<FieldValue, HashSet<Guid>>(new Uri("fabric://popo")), transactionBuilder),
               new Expression<Func<MyDto, string>>[]
               {
-          dto => dto.FirstName,
-          dto => dto.Lastname,
-          dto => dto.Birth.Day.ToString()
+                  dto => dto.FirstName,
+                  dto => dto.Lastname,
+                  dto => dto.Birth.Day.ToString()
               });
 
             for (var i = 0; i < 10; i++)
             {
                 var d = 1000 + i * 200;
-                var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i, new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
+                var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i,
+                    new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
                 await store.Insert(dto);
             }
 

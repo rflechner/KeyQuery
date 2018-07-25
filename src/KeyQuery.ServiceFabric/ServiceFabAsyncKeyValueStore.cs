@@ -6,6 +6,7 @@ using System.Transactions;
 using KeyQuery.Core;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
+using ITransaction = Microsoft.ServiceFabric.Data.ITransaction;
 
 namespace KeyQuery.ServiceFabric
 {
@@ -19,75 +20,42 @@ namespace KeyQuery.ServiceFabric
             this.wrappedReliableDictionary = wrappedReliableDictionary;
             this.transactionBuilder = transactionBuilder;
         }
-
-        private bool IsTransactionnel => Transaction.Current != null;
-
-        private async Task<T> Do<T>(Func<ITransaction, Task<T>> it)
+        
+        public Core.ITransaction CreateTransaction()
         {
-            var tx = transactionBuilder();
-            
-            try
-            {
-                var v = await it(tx);
-
-                if (IsTransactionnel)
-                    Transaction.Current.TransactionCompleted += async (sender, args) =>
-                    {
-                        if (tx != null)
-                        {
-                            if (args.Transaction.TransactionInformation.Status == TransactionStatus.Committed)
-                                await tx.CommitAsync();
-                            tx.Dispose();
-                        }
-                    };
-                else
-                    await tx.CommitAsync();
-
-                return v;
-            }
-            finally
-            {
-                if (!IsTransactionnel)
-                    tx.Dispose();
-            }
+            return new ServiceFabTransaction(transactionBuilder());
         }
         
-        public Task<TValue> AddOrUpdate(TKey key, TValue value, Func<TKey, TValue, TValue> updateWith)
+        public Task<TValue> AddOrUpdate(Core.ITransaction tx, TKey key, TValue value, Func<TKey, TValue, TValue> updateWith)
         {
-            return Do(async tx => await wrappedReliableDictionary.AddOrUpdateAsync(tx, key, value, updateWith));
+            return wrappedReliableDictionary.AddOrUpdateAsync(((ServiceFabTransaction)tx).WrappedTransaction, key, value, updateWith);
         }
 
-        public Task<TValue> GetOrAdd(TKey key, Func<TKey, TValue> addValueFactory)
+        public Task<TValue> GetOrAdd(Core.ITransaction tx, TKey key, Func<TKey, TValue> addValueFactory)
         {
-            return Do(async tx => await wrappedReliableDictionary.GetOrAddAsync(tx, key, key1 => addValueFactory.Invoke(key)));
+            return wrappedReliableDictionary.GetOrAddAsync(((ServiceFabTransaction)tx).WrappedTransaction, key, key1 => addValueFactory.Invoke(key));
         }
 
-        public Task<bool> TryAdd(TKey key, TValue value)
+        public Task<bool> TryAdd(Core.ITransaction tx, TKey key, TValue value)
         {
-            return Do(async tx => await wrappedReliableDictionary.TryAddAsync(tx, key, value));
+            return wrappedReliableDictionary.TryAddAsync(((ServiceFabTransaction)tx).WrappedTransaction, key, value);
         }
 
-        public Task<(bool success, TValue value)> TryRemove(TKey key)
+        public async Task<(bool success, TValue value)> TryRemove(Core.ITransaction tx, TKey key)
         {
-            return Do(async tx =>
-            {
-                var v = await wrappedReliableDictionary.TryRemoveAsync(tx, key);
-                return v.HasValue ? (true, v.Value) : (false, default(TValue));
-            });
+            var v = await wrappedReliableDictionary.TryRemoveAsync(((ServiceFabTransaction)tx).WrappedTransaction, key);
+            return v.HasValue ? (true, v.Value) : (false, default(TValue));
         }
 
-        public Task<TValue> Get(TKey key)
+        public async Task<TValue> Get(Core.ITransaction tx, TKey key)
         {
-            return Do(async tx =>
-            {
-                var conditionalValue = await wrappedReliableDictionary.TryGetValueAsync(tx, key);
-                return conditionalValue.HasValue ? conditionalValue.Value : default(TValue);
-            });
+            var conditionalValue = await wrappedReliableDictionary.TryGetValueAsync(((ServiceFabTransaction)tx).WrappedTransaction, key);
+            return conditionalValue.HasValue ? conditionalValue.Value : default(TValue);
         }
 
         public async Task<ICollection<TKey>> AllKeys()
         {
-            return await Do(async tx =>
+            using (var tx = transactionBuilder())
             {
                 var e = await wrappedReliableDictionary.CreateEnumerableAsync(tx);
                 var enumerator = e.GetAsyncEnumerator();
@@ -100,12 +68,12 @@ namespace KeyQuery.ServiceFabric
                 }
 
                 return results.AsReadOnly();
-            });
+            }
         }
 
         public async Task<ICollection<TValue>> AllValues()
         {
-            return await Do(async tx =>
+            using (var tx = transactionBuilder())
             {
                 var e = await wrappedReliableDictionary.CreateEnumerableAsync(tx);
                 var enumerator = e.GetAsyncEnumerator();
@@ -118,7 +86,7 @@ namespace KeyQuery.ServiceFabric
                 }
 
                 return results.AsReadOnly();
-            });
+            }
         }
     }
 }

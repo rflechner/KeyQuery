@@ -51,6 +51,12 @@ namespace WebSample1.Controllers
             await customerRepository.Insert(dto);
         }
 
+        [HttpPost("searchByFirstname")]
+        public async Task<IActionResult> SearchByFirstname([FromBody]string firstname)
+        {
+            return Json(await customerRepository.SearchByFirstname(firstname));
+        }
+
         // PUT api/values/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]string value)

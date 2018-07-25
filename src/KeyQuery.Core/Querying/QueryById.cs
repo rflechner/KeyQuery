@@ -14,9 +14,12 @@ namespace KeyQuery.Core.Querying
 
         public override async Task<ICollection<T>> Execute<TId, T>(DataStore<TId, T> store)
         {
-            var record = await store.Records.Get((TId) Id);
+            using (var tx = store.Records.CreateTransaction())
+            {
+                var record = await store.Records.Get(tx, (TId) Id);
 
-            return new[]{record};
+                return new[] {record};
+            }
         }
     }
 }
