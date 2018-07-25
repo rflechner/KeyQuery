@@ -29,7 +29,6 @@ namespace KeyQuery.CSharpTests
             var dto = new MyDto(Guid.NewGuid(), "toto", "jean", 32, new DateTime(1985, 02, 11));
             Expression<Func<MyDto, string>> expression1 = v => v.FirstName;
             Expression<Func<MyDto, string>> expression2 = v => v.Birth.ToString();
-            Expression expression3 = expression2;
 
             var f1 = expression1.Compile();
             var f2 = expression2.Compile();
@@ -45,24 +44,18 @@ namespace KeyQuery.CSharpTests
         {
             var store = await DataStore<Guid, MyDto>.Build(
               () => new InMemoryKeyValueStore<Guid, MyDto>(),
-              async _ => new InMemoryKeyValueStore<FieldValue, HashSet<Guid>>(),
-              new Expression<Func<MyDto, string>>[]
-              {
-                  dto => dto.FirstName,
-                  dto => dto.Lastname,
-                  dto => dto.Birth.Day.ToString()
-              });
+              async _ => new InMemoryKeyValueStore<FieldValue, HashSet<Guid>>(), 
+              dto => dto.FirstName, 
+              dto => dto.Lastname, 
+              dto => dto.Birth.Day.ToString());
 
-            using (var tx = store.CreateTransaction())
+            for (var i = 0; i < 10; i++)
             {
-                for (var i = 0; i < 10; i++)
-                {
-                    var d = 1000 + i * 200;
-                    var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i,
-                        new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
+                var d = 1000 + i * 200;
+                var dto = new MyDto(Guid.NewGuid(), $"firstname {i}", $"lastname {i}", i,
+                    new DateTime(1985, 02, 11) - TimeSpan.FromDays(d));
 
-                    await store.Insert(tx, dto);
-                }
+                await store.Insert(dto);
             }
 
             var someId = (await store.Records.AllKeys()).First();

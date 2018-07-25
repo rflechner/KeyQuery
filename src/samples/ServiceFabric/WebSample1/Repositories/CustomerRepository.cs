@@ -26,16 +26,9 @@ namespace WebSample1.Repositories
             return await store.FindOne(x => x.Where(c => c.Id == id));
         }
 
-        public async Task<bool> Insert(Customer customer)
+        public Task<bool> Insert(Customer customer)
         {
-            using (var tx = store.CreateTransaction())
-            {
-                var r = await store.Insert(tx, customer);
-
-                await tx.CommitAsync();
-
-                return r;
-            }
+            return store.Insert(customer);
         }
 
         public async Task<ICollection<Customer>> GetAllCustomers(CancellationToken cancellationToken = default)

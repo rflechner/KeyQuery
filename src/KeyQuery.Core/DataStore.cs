@@ -45,21 +45,25 @@ namespace KeyQuery.Core
             return new DataStore<TId, T>(buildPersistence(), indexes, indexedFields.ToDictionary(kv => kv.Item1, kv => kv.Item2));
         }
 
-        public async Task<bool> Insert(ITransaction tx, T record)
+        public async Task<bool> Insert(T record)
         {
-            if (!await records.TryAdd(tx, record.Id, record))
-                return false;
-
-            foreach (var index in indexValueProviders)
+            using (var tx = records.CreateTransaction())
             {
-                var value = index.Value(record);
-                await Index(tx, record.Id, index.Key, value);
-            }
+                if (!await records.TryAdd(tx, record.Id, record))
+                    return false;
 
-            return true;
+                foreach (var index in indexValueProviders)
+                {
+                    var value = index.Value(record);
+                    await Index(tx, record.Id, index.Key, value);
+                }
+
+                await tx.CommitAsync();
+                return true;
+            }
         }
 
-        public async Task Index(ITransaction tx, TId id, FieldName name, object value)
+        private async Task Index(ITransaction tx, TId id, FieldName name, object value)
         {
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
@@ -75,11 +79,15 @@ namespace KeyQuery.Core
                 var index = indexes.Stores[name];
                 var fieldValue = value?.ToString();
                 var ids = await index.GetOrAdd(tx, fieldValue, _ => new HashSet<TId>());
-                return await Task.WhenAll(ids.Select(id => records.Get(tx, id)).ToArray());
+                var results = await Task.WhenAll(ids.Select(id => records.Get(tx, id)).ToArray());
+
+                await tx.CommitAsync();
+                
+                return results;
             }
         }
 
-        public async Task RemoveIndexedValue(ITransaction tx, TId id, FieldName name, object value)
+        private async Task RemoveIndexedValue(ITransaction tx, TId id, FieldName name, object value)
         {
             var index = indexes.Stores[name];
             var fieldValue = value?.ToString();
@@ -89,19 +97,23 @@ namespace KeyQuery.Core
             await index.AddOrUpdate(tx, fieldValue, newIds, (_, __) => newIds);
         }
 
-        public async Task<bool> Remove(ITransaction tx, TId id)
+        public async Task<bool> Remove(TId id)
         {
-            (bool success, T record) = await records.TryRemove(tx, id);
-            if (!success)
-                return false;
-
-            foreach (var kv in indexValueProviders)
+            using (var tx = records.CreateTransaction())
             {
-                var value = kv.Value(record);
-                await RemoveIndexedValue(tx, record.Id, kv.Key, value);
-            }
+                (bool success, T record) = await records.TryRemove(tx, id);
+                if (!success)
+                    return false;
 
-            return true;
+                foreach (var kv in indexValueProviders)
+                {
+                    var value = kv.Value(record);
+                    await RemoveIndexedValue(tx, record.Id, kv.Key, value);
+                }
+                await tx.CommitAsync();
+                
+                return true;
+            }
         }
 
         public async Task<T> FindOne(Func<IQueryable<T>, IQueryable<T>> query)
@@ -121,11 +133,6 @@ namespace KeyQuery.Core
             var visitor = new QueryVisitor();
             visitor.Visit(expression);
             return await visitor.Operation.Execute(this);
-        }
-
-        public ITransaction CreateTransaction()
-        {
-            return records.CreateTransaction();
         }
     }
 }
